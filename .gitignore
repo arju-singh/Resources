@@ -1,0 +1,27 @@
+# OS / editor junk
+.DS_Store
+**/.DS_Store
+
+# Local Claude settings
+.claude/
+
+# Database with user emails + password hashes — never commit
+*.db
+users.db
+
+# Secrets
+.env
+*.env
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.pyc
+
+# Large data / content dumps (not code) — 453MB, contains files >100MB
+rom/
+library/
+
+# Server logs / scratch
+*.log

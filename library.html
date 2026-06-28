@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Library — 60+ AI, Coding & Career Resources</title>
+<meta name="description" content="A curated, animated library of 60+ free AI, Claude, coding, design, and career resources. Sign in to download.">
+<link rel="stylesheet" href="/static/styles.css">
+<style>
+  /* ===== Library page — premium animated theme ===== */
+  #bg-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -2; display: block; }
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(60% 50% at 15% 0%, rgba(168,85,247,.18), transparent 60%),
+      radial-gradient(50% 45% at 90% 10%, rgba(236,72,153,.16), transparent 60%),
+      radial-gradient(55% 50% at 50% 100%, rgba(6,182,212,.12), transparent 60%);
+  }
+
+  .lib-hero { text-align: center; padding: 80px 24px 30px; position: relative; }
+  .lib-hero .kicker { display:inline-flex; align-items:center; gap:8px; }
+  .lib-hero h1 { font-size: clamp(42px, 8vw, 86px); font-weight: 900; letter-spacing: -3px; line-height: .98; margin-top: 20px; }
+  .lib-hero h1 .g {
+    background: linear-gradient(90deg,#c084fc,#f0abfc,#fca5a5,#67e8f9,#c084fc);
+    background-size: 300% auto; -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: shimmer 6s linear infinite;
+  }
+  @keyframes shimmer { to { background-position: 300% center; } }
+  .lib-hero p { color: var(--muted); max-width: 640px; margin: 22px auto 0; font-size: 18px; line-height: 1.6; }
+  .lib-hero p b { color: var(--text); }
+
+  .stats { display: flex; gap: 40px; justify-content: center; margin: 38px auto 0; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat .num { font-size: 40px; font-weight: 900; letter-spacing: -1px;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .stat .lbl { color: var(--muted); font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px; }
+
+  .lib-controls { max-width: 1240px; margin: 10px auto 0; padding: 0 28px; position: sticky; top: 72px; z-index: 30; }
+  .lib-controls .bar {
+    background: rgba(20,20,23,.7); backdrop-filter: blur(14px);
+    border: 1px solid var(--border); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 14px;
+  }
+  .lib-search { display: flex; align-items: center; gap: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 0 14px; }
+  .lib-search input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); padding: 13px 4px; font-size: 15px; }
+  .lib-search input::placeholder { color: var(--muted); }
+  .chips { display: flex; gap: 10px; flex-wrap: wrap; }
+  .chip { cursor: pointer; user-select: none; font-size: 13px; font-weight: 700; color: var(--muted);
+    background: var(--bg); border: 1px solid var(--border); padding: 8px 15px; border-radius: 100px; transition: .18s; white-space: nowrap; }
+  .chip:hover { color: var(--text); border-color: #a855f7; }
+  .chip.active { color: #fff; background: var(--btn); border-color: transparent; box-shadow: 0 6px 20px rgba(168,85,247,.35); }
+  .chip .c { opacity: .65; margin-left: 6px; font-weight: 800; }
+
+  .lib-grid { max-width: 1240px; margin: 34px auto 0; padding: 0 28px 40px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 26px; }
+
+  .vcard { opacity: 0; transform: translateY(34px); perspective: 1000px; will-change: transform, opacity; }
+  .vtilt {
+    position: relative; border-radius: 20px; overflow: hidden; transform-style: preserve-3d;
+    background: rgba(20,20,23,.72); border: 1px solid var(--border); backdrop-filter: blur(8px);
+    transition: transform .12s ease-out, border-color .25s, box-shadow .25s; height: 100%;
+    display: flex; flex-direction: column;
+  }
+  .vcard:hover .vtilt { border-color: #6d28d9; box-shadow: 0 24px 60px -20px rgba(168,85,247,.55); }
+
+  .vcover { position: relative; aspect-ratio: 16/10; overflow: hidden; display: flex; align-items: flex-end; padding: 16px; }
+  .vcover .cimg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform .5s ease; }
+  .vcard:hover .vcover .cimg { transform: scale(1.06); }
+  .vcover::after { content:''; position:absolute; inset:0; background: linear-gradient(180deg, rgba(10,12,20,.05) 0%, rgba(10,12,20,.55) 65%, rgba(10,12,20,.9) 100%); }
+  .vcover .glare { position: absolute; inset: 0; opacity: 0; transition: opacity .2s;
+    background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,.28), transparent 45%); pointer-events: none; mix-blend-mode: overlay; }
+  .vcard:hover .vcover .glare { opacity: 1; }
+  .vfmt { position: absolute; top: 14px; right: 14px; z-index: 3; font-size: 10px; font-weight: 800; letter-spacing: 1px;
+    background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.25); padding: 5px 10px; border-radius: 8px; backdrop-filter: blur(4px); }
+  .vstar { position: absolute; top: 46px; right: 14px; z-index: 3; font-size: 10px; font-weight: 800; letter-spacing: .5px; color: #0a0a0b;
+    background: linear-gradient(90deg,#fde047,#facc15); padding: 4px 9px; border-radius: 8px; box-shadow: 0 4px 14px rgba(250,204,21,.45); }
+  .vicon { position: absolute; top: 12px; left: 14px; z-index: 3; font-size: 24px; filter: drop-shadow(0 3px 8px rgba(0,0,0,.6)); transform: translateZ(40px); }
+  .vcat { position: relative; z-index: 3; font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+    color: #fff; background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.22); padding: 4px 10px; border-radius: 100px; backdrop-filter: blur(4px); }
+
+  .vbody { padding: 18px 18px 20px; display: flex; flex-direction: column; flex: 1; transform: translateZ(20px); }
+  .vtitle { font-size: 18px; font-weight: 800; line-height: 1.25; letter-spacing: -.3px; }
+  .vdesc { color: var(--muted); font-size: 13.5px; line-height: 1.55; margin: 9px 0 14px; flex: 1;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .vtags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .vtags span { font-size: 11px; font-weight: 700; color: #d6bcff; background: rgba(192,132,252,.12); border: 1px solid rgba(192,132,252,.28); padding: 3px 9px; border-radius: 8px; }
+  .vmeta { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+  .vmeta b { color: var(--text); }
+  .vdl { display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; color: #fff;
+    background: var(--btn); padding: 12px; border-radius: 12px; font-weight: 800; font-size: 14px; transition: .2s; }
+  .vdl:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -8px rgba(236,72,153,.6); }
+  .vdl.locked { background: rgba(255,255,255,.04); border: 1px solid var(--border); color: var(--text); }
+  .vdl.locked:hover { border-color: #a855f7; box-shadow: none; }
+
+  .lib-empty { grid-column: 1/-1; text-align: center; color: var(--muted); padding: 70px 20px; border: 1px dashed var(--border); border-radius: 20px; display: none; }
+  .vcard { cursor: pointer; }
+  .vmore { margin-top: auto; padding-top: 4px; text-align: center; color: var(--muted); font-size: 12.5px; font-weight: 700; letter-spacing: .3px; }
+
+  /* ===== Resource detail modal ===== */
+  .rmodal { position: fixed; inset: 0; z-index: 200; display: none; align-items: flex-start; justify-content: center;
+    padding: 48px 18px; overflow-y: auto; background: rgba(5,6,10,.72); backdrop-filter: blur(8px); }
+  .rmodal.open { display: flex; }
+  .rsheet { width: 100%; max-width: 720px; background: #0f0f13; border: 1px solid var(--border); border-radius: 22px; overflow: hidden;
+    box-shadow: 0 40px 120px -30px rgba(0,0,0,.8); animation: rpop .35s cubic-bezier(.16,1,.3,1); }
+  @keyframes rpop { from { opacity:0; transform: translateY(24px) scale(.97); } to { opacity:1; transform:none; } }
+  .rbanner { position: relative; aspect-ratio: 16/8.4; display: flex; align-items: flex-end; padding: 22px; overflow: hidden; }
+  .rbanner img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position: top center; }
+  .rbanner::after { content:''; position:absolute; inset:0; background: linear-gradient(180deg, rgba(10,12,20,.1), rgba(10,12,20,.55) 70%, rgba(15,15,19,.95)); }
+  .rbanner .ricon { position:absolute; top:18px; left:50%; transform:translateX(-50%); font-size:56px; z-index:2; filter: drop-shadow(0 6px 18px rgba(0,0,0,.6)); opacity:.0; }
+  .rbanner:not(.has-img) .ricon { opacity:1; top:auto; bottom:60px; }
+  .rfree { position:absolute; top:18px; left:20px; z-index:3; font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase;
+    color:#fff; background: linear-gradient(90deg,#f97316,#ef4444); padding:8px 16px; border-radius:100px; box-shadow:0 6px 18px rgba(239,68,68,.4); }
+  .rfmt { position:absolute; top:18px; right:20px; z-index:3; font-size:11px; font-weight:800; letter-spacing:1px; color:#fff;
+    background: rgba(0,0,0,.6); border:1px solid rgba(255,255,255,.25); padding:6px 12px; border-radius:8px; backdrop-filter: blur(4px); }
+  .rbody { padding: 26px 28px 30px; }
+  .rtitle { font-size: clamp(24px,4vw,34px); font-weight: 900; letter-spacing: -1px; line-height: 1.15; }
+  .rmeta { color: var(--muted); font-size: 14px; margin-top: 12px; }
+  .rmeta b { color: var(--text); }
+  .rtags { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  .rtags span { font-size:12px; font-weight:700; color:#d6bcff; background:rgba(192,132,252,.12); border:1px solid rgba(192,132,252,.28); padding:4px 11px; border-radius:8px; }
+  details.rabout { margin-top:20px; border:1px solid var(--border); border-radius:14px; background: var(--panel2); }
+  details.rabout summary { list-style:none; cursor:pointer; padding:16px 18px; display:flex; align-items:center; gap:10px; font-weight:700; font-size:15px; }
+  details.rabout summary::-webkit-details-marker { display:none; }
+  details.rabout summary .pl { margin-left:auto; color:var(--muted); font-size:22px; transition:transform .2s; }
+  details.rabout[open] summary .pl { transform: rotate(45deg); }
+  details.rabout .rdesc { padding: 0 18px 18px; color: var(--muted); font-size:14.5px; line-height:1.65; }
+  .ractions { display:flex; gap:14px; margin-top:24px; flex-wrap:wrap; }
+  .rdl { flex:1; min-width:200px; display:flex; align-items:center; justify-content:center; gap:10px; text-decoration:none; color:#fff;
+    background: var(--btn); padding:15px; border-radius:14px; font-weight:800; font-size:16px; transition:.2s; box-shadow:0 10px 30px -8px rgba(236,72,153,.55); }
+  .rdl:hover { transform: translateY(-2px); box-shadow:0 16px 40px -10px rgba(236,72,153,.7); }
+  .rdl.locked { background: rgba(255,255,255,.04); border:1px solid var(--border); box-shadow:none; }
+  .rcopy { display:flex; align-items:center; justify-content:center; gap:9px; text-decoration:none; cursor:pointer;
+    background: transparent; color: var(--text); border:1px solid var(--border); padding:15px 22px; border-radius:14px; font-weight:700; font-size:15px; transition:.2s; }
+  .rcopy:hover { border-color:#a855f7; }
+  .rclose { position: fixed; top: 22px; right: 26px; z-index: 210; width:42px; height:42px; border-radius:50%; cursor:pointer;
+    background: rgba(20,20,23,.8); border:1px solid var(--border); color:var(--text); font-size:20px; display:flex; align-items:center; justify-content:center; backdrop-filter: blur(6px); }
+  .rclose:hover { border-color:#a855f7; color:#fff; }
+
+  @media (max-width: 760px){
+    .lib-controls { top: 64px; padding: 0 16px; }
+    .lib-grid { padding-left: 16px; padding-right: 16px; }
+    .stats { gap: 26px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .lib-hero h1 .g { animation: none; }
+    .vcard { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+
+  <nav>
+    <a class="brand" href="/"><span class="bolt">⚡</span> Everything You Need</a>
+    <div class="nav-links">
+      <a href="/free-llm-apis.html">Free LLM APIs</a>
+      <a href="/library.html" class="active">Library</a>
+      <a href="/links.html">Links</a>
+      <span id="nav-auth"></span>
+    </div>
+  </nav>
+
+  <header class="lib-hero">
+    <span class="eyebrow-pill kicker">📚 The Vault · Curated &amp; Free</span>
+    <h1>The <span class="g">Library</span></h1>
+    <p>A hand-curated vault of AI, Claude, coding, design &amp; career resources — guides, prompt packs, roadmaps, and cheat sheets. <b id="gate-note">Sign in to download — it's free.</b></p>
+    <div class="stats">
+      <div class="stat"><div class="num" data-count="0" id="stat-files">0</div><div class="lbl">Resources</div></div>
+      <div class="stat"><div class="num" data-count="0" id="stat-cats">0</div><div class="lbl">Categories</div></div>
+      <div class="stat"><div class="num" id="stat-free">100%</div><div class="lbl">Free Access</div></div>
+    </div>
+  </header>
+
+  <section class="lib-controls">
+    <div class="bar">
+      <div class="lib-search">
+        <span>🔍</span>
+        <input id="search" type="text" placeholder="Search the library — prompts, Claude, interview, 3D…" autocomplete="off">
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+  </section>
+
+  <main class="lib-grid" id="grid">
+    <div class="lib-empty" id="empty">Nothing matches your search — try another keyword.</div>
+  </main>
+
+  <!-- Resource detail modal -->
+  <div class="rmodal" id="rmodal" aria-hidden="true">
+    <button class="rclose" id="rclose" aria-label="Close" style="display:none;">✕</button>
+    <div class="rsheet" id="rsheet" role="dialog" aria-modal="true"></div>
+  </div>
+
+  <footer class="site">
+    <div class="inner">
+      <div class="col">
+        <a class="brand" href="/"><span class="bolt">⚡</span> Everything You Need</a>
+        <p style="color:var(--muted);font-size:14px;margin-top:12px;max-width:240px;">AI tools & resources that work while you sleep.</p>
+      </div>
+      <div class="col"><h4>Explore</h4><a href="/library.html">Library</a><a href="/free-llm-apis.html">Free LLM APIs</a></div>
+      <div class="col"><h4>Company</h4><a href="#">About</a><a href="#">Contact</a></div>
+      <div class="col"><h4>Legal</h4><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/contact.html">Contact</a></div>
+    </div>
+    <div class="bottom">© 2026 AI Tools. All rights reserved.</div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+  <script src="/static/library-data.js"></script>
+
+  <!-- Three.js animated background + Motion-driven UI -->
+  <script type="module">
+    let animate, inView, stagger;
+    try {
+      ({ animate, inView, stagger } = await import('https://cdn.jsdelivr.net/npm/motion@11.11.13/+esm'));
+    } catch (e) { /* graceful: no motion lib */ }
+
+    const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let DATA = window.LIBRARY || [];
+    let CATS = window.LIBRARY_CATS || [];
+
+    // Drop any resource whose underlying file was physically deleted from /library
+    async function pruneDeleted(){
+      try {
+        const r = await fetch('/api/library-files');
+        if (!r.ok) return;
+        const { files } = await r.json();
+        const live = new Set(files);
+        DATA = DATA.filter(d => live.has(d.file));
+        CATS = CATS.filter(c => DATA.some(d => d.cat === c));
+      } catch { /* offline: keep static list */ }
+    }
+
+    /* ---------- THREE.JS BACKGROUND ---------- */
+    (async function bg(){
+      if (REDUCE) return;
+      let THREE;
+      try { THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js'); }
+      catch (e) { return; } // gradient fallback already in CSS
+      const canvas = document.getElementById('bg-canvas');
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
+      camera.position.z = 16;
+
+      const group = new THREE.Group(); scene.add(group);
+
+      // Particle galaxy
+      const COUNT = 1800;
+      const pos = new Float32Array(COUNT*3);
+      const col = new Float32Array(COUNT*3);
+      const palette = [[0.75,0.52,0.99],[0.94,0.45,0.71],[0.40,0.91,0.95]];
+      for (let i=0;i<COUNT;i++){
+        const r = 6 + Math.random()*14;
+        const t = Math.random()*Math.PI*2;
+        const p = Math.acos(2*Math.random()-1);
+        pos[i*3]   = r*Math.sin(p)*Math.cos(t);
+        pos[i*3+1] = r*Math.sin(p)*Math.sin(t)*0.6;
+        pos[i*3+2] = r*Math.cos(p);
+        const c = palette[(Math.random()*palette.length)|0];
+        col[i*3]=c[0]; col[i*3+1]=c[1]; col[i*3+2]=c[2];
+      }
+      const pg = new THREE.BufferGeometry();
+      pg.setAttribute('position', new THREE.BufferAttribute(pos,3));
+      pg.setAttribute('color', new THREE.BufferAttribute(col,3));
+      const pm = new THREE.PointsMaterial({ size:0.085, vertexColors:true, transparent:true, opacity:0.85, depthWrite:false, blending:THREE.AdditiveBlending });
+      group.add(new THREE.Points(pg, pm));
+
+      // Floating wireframe shapes
+      const shapes = [];
+      const geos = [new THREE.IcosahedronGeometry(2.2,0), new THREE.OctahedronGeometry(1.6,0), new THREE.TorusGeometry(1.7,0.5,10,28)];
+      const cols = [0xc084fc, 0xf472b6, 0x67e8f9];
+      for (let i=0;i<3;i++){
+        const m = new THREE.Mesh(geos[i], new THREE.MeshBasicMaterial({ color:cols[i], wireframe:true, transparent:true, opacity:0.28 }));
+        m.position.set((i-1)*8.5, (i%2?3:-3), -3 - i*2);
+        scene.add(m); shapes.push(m);
+      }
+
+      let tx=0, ty=0, cx=0, cy=0;
+      addEventListener('pointermove', e => { tx=(e.clientX/innerWidth-0.5); ty=(e.clientY/innerHeight-0.5); }, { passive:true });
+      addEventListener('resize', () => {
+        camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+        renderer.setSize(innerWidth, innerHeight);
+      });
+      renderer.setSize(innerWidth, innerHeight);
+
+      let running = true;
+      document.addEventListener('visibilitychange', () => { running = !document.hidden; if(running) loop(); });
+      const clock = new THREE.Clock();
+      function loop(){
+        if (!running) return;
+        requestAnimationFrame(loop);
+        const t = clock.getElapsedTime();
+        group.rotation.y = t*0.04;
+        group.rotation.x = Math.sin(t*0.15)*0.12;
+        shapes.forEach((s,i)=>{ s.rotation.x += 0.002+i*0.0008; s.rotation.y += 0.003; s.position.y += Math.sin(t*0.6+i)*0.004; });
+        cx += (tx-cx)*0.04; cy += (ty-cy)*0.04;
+        camera.position.x = cx*4; camera.position.y = -cy*3;
+        camera.lookAt(0,0,0);
+        renderer.render(scene, camera);
+      }
+      loop();
+    })();
+
+    /* ---------- DATA / UI ---------- */
+    const grid = document.getElementById('grid');
+    const empty = document.getElementById('empty');
+    const search = document.getElementById('search');
+    const chipsEl = document.getElementById('chips');
+    let activeCat = 'All';
+
+    const fmtSize = b => b < 1024 ? b+' B' : b < 1048576 ? (b/1024).toFixed(0)+' KB' : (b/1048576).toFixed(1)+' MB';
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+    // Build chips
+    function buildChips(){
+      const counts = {}; DATA.forEach(d => counts[d.cat]=(counts[d.cat]||0)+1);
+      const featCount = DATA.filter(d => d.feat).length;
+      const all = [['All', DATA.length], ...(featCount?[['★ Featured', featCount]]:[]), ...CATS.map(c => [c, counts[c]||0])];
+      chipsEl.innerHTML = all.map(([c,n]) =>
+        `<button class="chip ${c==='All'?'active':''}" data-cat="${esc(c)}">${esc(c)}<span class="c">${n}</span></button>`).join('');
+      chipsEl.querySelectorAll('.chip').forEach(ch => ch.addEventListener('click', () => {
+        chipsEl.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+        ch.classList.add('active'); activeCat = ch.dataset.cat; render();
+      }));
+    }
+
+    /* ---------- Resource detail modal ---------- */
+    const rmodal = document.getElementById('rmodal');
+    const rsheet = document.getElementById('rsheet');
+    const rclose = document.getElementById('rclose');
+    let lastFocus = null;
+
+    function modalActions(d){
+      if (AUTH.user) {
+        return `<a class="rdl" id="rdl" href="/libdl?file=${encodeURIComponent(d.file)}" download>⬇ Download Free</a>`;
+      }
+      return `<a class="rdl locked" href="/login.html?next=library#r-${d.i}">🔐 Sign in to Download</a>`;
+    }
+
+    function openModal(d){
+      lastFocus = document.activeElement;
+      const hasImg = `/static/covers-lib/cover-${d.i}.png`;
+      rsheet.innerHTML = `
+        <div class="rbanner has-img" style="background:${d.grad}">
+          <img src="${hasImg}" alt="" onerror="this.remove(); this.parentElement.classList.remove('has-img');">
+          <span class="ricon">${d.icon}</span>
+          <span class="rfree">${d.feat ? '★ Featured' : 'Free Resource'}</span>
+          <span class="rfmt">${d.fmt}</span>
+        </div>
+        <div class="rbody">
+          <h2 class="rtitle">${esc(d.title)}</h2>
+          <div class="rmeta"><b>${d.dl.toLocaleString()}</b> downloads &nbsp;·&nbsp; ${fmtSize(d.size)} &nbsp;·&nbsp; ${esc(d.cat)}</div>
+          <div class="rtags">${d.tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>
+          <details class="rabout" open>
+            <summary>📖 About this resource <span class="pl">+</span></summary>
+            <div class="rdesc">${esc(d.desc)}</div>
+          </details>
+          <div class="ractions">
+            ${modalActions(d)}
+            <button class="rcopy" id="rcopy">🔗 Copy Link</button>
+          </div>
+        </div>`;
+      // copy link
+      const copyBtn = document.getElementById('rcopy');
+      if (copyBtn) copyBtn.addEventListener('click', async () => {
+        const url = `${location.origin}/library.html#r-${d.i}`;
+        try { await navigator.clipboard.writeText(url); } catch {
+          const t=document.createElement('textarea'); t.value=url; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove();
+        }
+        copyBtn.textContent = '✓ Copied!';
+        setTimeout(()=>{ copyBtn.textContent = '🔗 Copy Link'; }, 1600);
+      });
+      rmodal.classList.add('open');
+      rclose.style.display = 'flex';
+      rmodal.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+      if (location.hash !== `#r-${d.i}`) history.replaceState(null,'',`#r-${d.i}`);
+    }
+
+    function closeModal(){
+      rmodal.classList.remove('open');
+      rclose.style.display = 'none';
+      rmodal.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+      if (location.hash.startsWith('#r-')) history.replaceState(null,'',location.pathname);
+      if (lastFocus) lastFocus.focus();
+    }
+    rclose.addEventListener('click', closeModal);
+    rmodal.addEventListener('click', e => { if (e.target === rmodal) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && rmodal.classList.contains('open')) closeModal(); });
+
+    function cardHTML(d){
+      return `
+        <article class="vcard" data-text="${esc((d.title+' '+d.cat+' '+d.tags.join(' ')+' '+d.desc).toLowerCase())}" data-cat="${esc(d.cat)}">
+          <div class="vtilt">
+            <div class="vcover" style="background:${d.grad}">
+              <img class="cimg" src="/static/covers-lib/cover-${d.i}.png" alt="" loading="lazy" onerror="this.remove()">
+              <span class="glare"></span>
+              <span class="vicon">${d.icon}</span>
+              <span class="vfmt">${d.fmt}</span>
+              ${d.feat ? '<span class="vstar">★ Featured</span>' : ''}
+              <span class="vcat">${esc(d.cat)}</span>
+            </div>
+            <div class="vbody">
+              <h3 class="vtitle">${esc(d.title)}</h3>
+              <p class="vdesc">${esc(d.desc)}</p>
+              <div class="vtags">${d.tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>
+              <div class="vmeta"><b>${d.dl.toLocaleString()}</b> downloads · ${fmtSize(d.size)}</div>
+              <div class="vmore">View &amp; download ↗</div>
+            </div>
+          </div>
+        </article>`;
+    }
+
+    function attachTilt(card){
+      const tilt = card.querySelector('.vtilt');
+      const glare = card.querySelector('.glare');
+      const cover = card.querySelector('.vcover');
+      card.addEventListener('pointermove', e => {
+        const r = card.getBoundingClientRect();
+        const px = (e.clientX-r.left)/r.width, py = (e.clientY-r.top)/r.height;
+        tilt.style.transform = `rotateY(${(px-0.5)*10}deg) rotateX(${(0.5-py)*10}deg)`;
+        if (cover) { cover.style.setProperty('--mx', (px*100)+'%'); cover.style.setProperty('--my', (py*100)+'%'); }
+      });
+      card.addEventListener('pointerleave', () => { tilt.style.transform = ''; });
+    }
+
+    function render(){
+      const q = search.value.trim().toLowerCase();
+      const items = DATA.filter(d =>
+        (activeCat==='All' || (activeCat==='★ Featured' ? d.feat : d.cat===activeCat)) &&
+        (!q || (d.title+' '+d.cat+' '+d.tags.join(' ')+' '+d.desc).toLowerCase().includes(q)));
+      grid.querySelectorAll('.vcard').forEach(n=>n.remove());
+      empty.style.display = items.length ? 'none' : 'block';
+      const frag = document.createElement('div');
+      frag.innerHTML = items.map(cardHTML).join('');
+      const cards = [...frag.children];
+      cards.forEach((c, idx) => { grid.appendChild(c); attachTilt(c); c.addEventListener('click', () => openModal(items[idx])); });
+      // reveal
+      cards.forEach((c, idx) => {
+        if (REDUCE || !animate || !inView) { c.style.opacity=1; c.style.transform='none'; return; }
+        inView(c, () => {
+          animate(c, { opacity:[0,1], transform:['translateY(34px) scale(.96)','translateY(0px) scale(1)'] },
+            { duration:0.6, delay:(idx%4)*0.07, easing:[0.16,1,0.3,1] });
+        }, { amount: 0.15 });
+      });
+    }
+
+    function countUp(el, to){
+      if (REDUCE || !animate) { el.textContent = to; return; }
+      animate(0, to, { duration:1.2, easing:'ease-out', onUpdate: v => el.textContent = Math.round(v) });
+    }
+
+    async function boot(){
+      await pruneDeleted();
+      buildChips();
+      render();
+      countUp(document.getElementById('stat-files'), DATA.length);
+      countUp(document.getElementById('stat-cats'), CATS.length);
+      // hero entrance
+      if (!REDUCE && animate) {
+        animate('.lib-hero .eyebrow-pill', { opacity:[0,1], transform:['translateY(12px)','translateY(0)'] }, { duration:.6 });
+        animate('.lib-hero h1', { opacity:[0,1], transform:['translateY(20px)','translateY(0)'] }, { duration:.7, delay:.08 });
+        animate('.lib-hero p', { opacity:[0,1], transform:['translateY(16px)','translateY(0)'] }, { duration:.7, delay:.16 });
+      }
+      await AUTH.fetchMe();
+      const note = document.getElementById('gate-note');
+      if (AUTH.user && note) note.textContent = `Signed in as ${AUTH.user.email} — download anything.`;
+      render(); // re-render so download buttons reflect auth
+      // deep-link: open a resource if URL has #r-<index>
+      const m = location.hash.match(/^#r-(\d+)$/);
+      if (m) { const d = DATA.find(x => String(x.i) === m[1]); if (d) openModal(d); }
+    }
+    search.addEventListener('input', render);
+    boot();
+  </script>
+</body>
+</html>

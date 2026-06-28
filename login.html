@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — AI Tools</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <nav>
+    <a class="brand" href="/"><span class="bolt">⚡</span> Everything You Need</a>
+    <div class="nav-links">
+      <a href="/free-llm-apis.html">Free LLM APIs</a>
+      <a href="/library.html">Library</a>
+      <a href="/links.html">Links</a>
+      <span id="nav-auth"></span>
+    </div>
+  </nav>
+
+  <div class="form-wrap">
+    <div class="form-card">
+      <h1 id="form-title">Welcome back</h1>
+      <p class="sub" id="form-sub">Log in to download free resources.</p>
+
+      <div class="msg" id="msg"></div>
+
+      <form id="auth-form">
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@example.com" required autocomplete="email">
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="••••••••" required minlength="6" autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn-grad full" id="submit-btn">Log In</button>
+      </form>
+
+      <div class="toggle" id="toggle"></div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    let mode = params.get('mode') === 'signup' ? 'signup' : 'login';
+    const next = params.get('next');
+
+    const title = document.getElementById('form-title');
+    const sub = document.getElementById('form-sub');
+    const submitBtn = document.getElementById('submit-btn');
+    const toggle = document.getElementById('toggle');
+    const msg = document.getElementById('msg');
+    const form = document.getElementById('auth-form');
+    const pw = document.getElementById('password');
+
+    function applyMode() {
+      if (mode === 'signup') {
+        title.textContent = 'Create your free account';
+        sub.textContent = 'Sign up to unlock the entire resource library.';
+        submitBtn.textContent = 'Sign Up';
+        pw.setAttribute('autocomplete', 'new-password');
+        toggle.innerHTML = `Already have an account? <a href="#" id="swap">Log in</a>`;
+      } else {
+        title.textContent = 'Welcome back';
+        sub.textContent = 'Log in to download free resources.';
+        submitBtn.textContent = 'Log In';
+        pw.setAttribute('autocomplete', 'current-password');
+        toggle.innerHTML = `New here? <a href="#" id="swap">Create a free account</a>`;
+      }
+      document.getElementById('swap').addEventListener('click', e => {
+        e.preventDefault();
+        mode = mode === 'signup' ? 'login' : 'signup';
+        msg.className = 'msg';
+        applyMode();
+      });
+    }
+    applyMode();
+
+    function showMsg(text, kind) {
+      msg.textContent = text;
+      msg.className = 'msg ' + kind;
+    }
+
+    function redirectAfterAuth() {
+      const dest = { resources: '/library.html', library: '/library.html' };
+      const base = dest[next] || '/';
+      location.href = base + (location.hash || '');
+    }
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = pw.value;
+      submitBtn.disabled = true;
+      const endpoint = mode === 'signup' ? '/api/signup' : '/api/login';
+      try {
+        const r = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await r.json();
+        if (r.ok) {
+          showMsg(mode === 'signup' ? 'Account created! Redirecting…' : 'Logged in! Redirecting…', 'success');
+          setTimeout(redirectAfterAuth, 700);
+        } else {
+          showMsg(data.error || 'Something went wrong.', 'error');
+          submitBtn.disabled = false;
+        }
+      } catch {
+        showMsg('Network error. Is the server running?', 'error');
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

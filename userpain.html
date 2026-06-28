@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Pain Radar — Everything You Need</title>
+<meta name="description" content="AI agent that discovers user pain points across 11+ platforms, scores monetization potential, and ranks opportunities. Plus a live pain-resolved tracker.">
+<link rel="canonical" href="/userpain.html">
+<link rel="stylesheet" href="/static/styles.css">
+<link rel="stylesheet" href="/static/linkpage.css">
+<style>
+  .up { max-width: 940px; margin: 0 auto; padding: 0 24px 70px; }
+
+  .up h2.sec { font-size: 24px; margin: 40px 0 6px; letter-spacing: -.5px; }
+  .up .lead { color: var(--muted); font-size: 15px; line-height: 1.7; }
+  .up a { color: #c084fc; }
+
+  .what { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 14px; margin-top: 18px; }
+  .what .w { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+  .what .w .e { font-size: 22px; }
+  .what .w h3 { font-size: 15px; margin: 8px 0 4px; }
+  .what .w p { color: var(--muted); font-size: 13px; line-height: 1.55; margin: 0; }
+
+  details.doc { border: 1px solid var(--border); border-radius: 14px; background: var(--panel); margin: 14px 0; overflow: hidden; }
+  details.doc > summary { list-style: none; cursor: pointer; padding: 16px 18px; font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 10px; }
+  details.doc > summary::-webkit-details-marker { display: none; }
+  details.doc > summary .chev { margin-left: auto; color: var(--muted); transition: transform .2s; }
+  details.doc[open] > summary .chev { transform: rotate(90deg); }
+  details.doc .body { padding: 0 20px 20px; color: var(--muted); font-size: 14px; line-height: 1.7; }
+  details.doc .body h4 { color: var(--text); font-size: 14px; margin: 18px 0 6px; }
+  details.doc .body code { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; font-size: 12.5px; color: #f0abfc; }
+  details.doc .body pre { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px; overflow-x: auto; font-size: 12.5px; color: var(--text); }
+  details.doc .body table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 13px; }
+  details.doc .body th, details.doc .body td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  details.doc .body th { color: var(--text); background: var(--panel2); }
+
+  .exec { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px; margin-top: 16px; }
+  .exec .meta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+  .exec .meta .pill { font-size: 12px; font-weight: 700; color: #d6bcff; background: rgba(192,132,252,.12); border: 1px solid rgba(192,132,252,.28); padding: 5px 11px; border-radius: 100px; }
+  .exec p { color: var(--muted); font-size: 14.5px; line-height: 1.75; margin: 0; }
+
+  /* progress */
+  .up-progress { position: sticky; top: 0; z-index: 6; background: rgba(10,10,11,.9); backdrop-filter: blur(10px); padding: 16px 0 14px; margin: 26px 0 4px; border-bottom: 1px solid var(--border); }
+  .up-progress .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
+  .up-progress .label { font-size: 14px; font-weight: 800; }
+  .up-progress .count { font-size: 13px; color: var(--muted); font-weight: 700; }
+  .up-bar { height: 9px; border-radius: 100px; background: var(--panel2); overflow: hidden; }
+  .up-bar > span { display: block; height: 100%; width: 0; background: linear-gradient(90deg,#34d399,#22d3ee); border-radius: 100px; transition: width .35s ease; }
+  .up-reset { background: var(--panel); border: 1px solid var(--border); color: var(--muted); padding: 7px 14px; border-radius: 100px; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .up-reset:hover { color: var(--text); border-color: #34d399; }
+  .up-hint { color: var(--muted); font-size: 13px; margin: 10px 0 0; }
+
+  /* category cards */
+  .cat { background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 22px 22px 10px; margin: 16px 0; }
+  .cat .chead { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .cat .chead h3 { font-size: 19px; margin: 0; }
+  .cat .verdict { font-size: 11px; font-weight: 800; letter-spacing: .5px; padding: 4px 10px; border-radius: 100px; }
+  .cat .verdict.top { color: #fde68a; background: rgba(251,191,36,.13); border: 1px solid rgba(251,191,36,.35); }
+  .cat .verdict.explore { color: #93c5fd; background: rgba(96,165,250,.13); border: 1px solid rgba(96,165,250,.35); }
+  .cat .cresolved { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--muted); }
+  .cat .scores { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 12px 0 6px; font-size: 13px; color: var(--muted); }
+  .cat .scores b { color: var(--text); }
+  .cat .scores .pricing { color: #fbbf24; font-weight: 700; }
+  .cat .why { font-size: 13.5px; color: var(--muted); line-height: 1.65; font-style: italic; margin: 8px 0 14px; padding-left: 12px; border-left: 2px solid var(--border); }
+
+  .pp { display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: 12px; transition: background .12s; }
+  .pp:hover { background: var(--panel2); }
+  .pp + .pp { border-top: 1px solid var(--border); }
+  .pp input { appearance: none; -webkit-appearance: none; flex: 0 0 auto; width: 18px; height: 18px; margin: 2px 0 0; border: 2px solid var(--border); border-radius: 5px; background: var(--bg); cursor: pointer; position: relative; transition: .15s; }
+  .pp input:hover { border-color: #34d399; }
+  .pp input:checked { background: linear-gradient(135deg,#34d399,#22d3ee); border-color: #34d399; }
+  .pp input:checked::after { content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #0a0a0b; font-size: 12px; font-weight: 900; }
+  .pp .pbody { flex: 1; min-width: 0; }
+  .pp .ptext { font-size: 14px; color: var(--text); line-height: 1.5; }
+  .pp.done .ptext { color: var(--muted); text-decoration: line-through; text-decoration-color: rgba(52,211,153,.6); }
+  .pp .pmeta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 7px; font-size: 12px; }
+  .pp .chip { font-weight: 700; padding: 2px 8px; border-radius: 100px; border: 1px solid var(--border); color: var(--muted); }
+  .pp .chip.hi { color: #fca5a5; border-color: rgba(248,113,113,.4); background: rgba(248,113,113,.08); }
+  .pp .chip.med { color: #fcd34d; border-color: rgba(251,191,36,.4); background: rgba(251,191,36,.08); }
+  .pp .quote { color: var(--muted); font-style: italic; }
+  .pp .src { color: #c084fc; text-decoration: none; font-weight: 700; }
+  .pp .src:hover { text-decoration: underline; }
+
+  .alldone { display: none; text-align: center; background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.4); color: #6ee7b7; border-radius: 14px; padding: 16px; font-weight: 700; margin: 16px 0; }
+  .alldone.show { display: block; }
+</style>
+</head>
+<body class="lp">
+  <canvas id="bg-canvas"></canvas>
+  <nav>
+    <a class="brand" href="/"><span class="bolt">⚡</span> Everything You Need</a>
+    <div class="nav-links">
+      <a href="/free-llm-apis.html">Free LLM APIs</a>
+      <a href="/library.html">Library</a>
+      <a href="/links.html">Links</a>
+      <a href="/checklist.html">Checklist</a>
+      <a href="/userpain.html" class="active">User Pain</a>
+      <span id="nav-auth"></span>
+    </div>
+  </nav>
+
+  <header class="lp-hero">
+    <a class="back" href="/">← Home</a>
+    <div><span class="eyebrow-pill">🎯 Find the pain · Fix the pain</span></div>
+    <h1>User Pain <span class="g">Radar</span></h1>
+    <p>An AI agent that discovers user pain points across 11+ platforms, categorizes them, scores monetization potential, and generates priority-ranked opportunity reports — then a live tracker to mark each pain <b>solved</b>.</p>
+  </header>
+
+  <main class="up">
+
+    <h2 class="sec">What it does</h2>
+    <p class="lead">User Pain Radar searches the internet for complaints, frustrations and unmet needs about any topic you give it. It:</p>
+    <div class="what">
+      <div class="w"><div class="e">🔍</div><h3>Searches 11+ platforms</h3><p>Reddit, Twitter/X, Instagram, Facebook, Hacker News, Product Hunt, Stack Overflow, Amazon, App/Play Store, news media and forums.</p></div>
+      <div class="w"><div class="e">💬</div><h3>Reads comments</h3><p>Dives into comment sections, reply threads and discussions where the real pain points live.</p></div>
+      <div class="w"><div class="e">📊</div><h3>Categorizes findings</h3><p>Groups pain into actionable themes — Pricing, Communication, Quality, Trust, and more.</p></div>
+      <div class="w"><div class="e">💰</div><h3>Scores monetization</h3><p>Rates each category for pain intensity (1–10) and monetization potential (1–10).</p></div>
+      <div class="w"><div class="e">💲</div><h3>Suggests pricing</h3><p>Recommends service tiers from evidence — per-project, hourly, or retainer models.</p></div>
+      <div class="w"><div class="e">📋</div><h3>Generates reports</h3><p>Priority-ranked opportunity reports with scores, verdicts and pricing recommendations.</p></div>
+    </div>
+
+    <h2 class="sec">Documentation</h2>
+
+    <details class="doc">
+      <summary>🚀 Quick start <span class="chev">›</span></summary>
+      <div class="body">
+        <h4>Prerequisites</h4>
+        <ul>
+          <li><strong>Python 3.7+</strong> (for utility scripts — no pip installs needed)</li>
+          <li><strong>An LLM-powered coding assistant</strong> with web search and browser capabilities</li>
+        </ul>
+        <h4>Installation</h4>
+        <p><strong>Option 1 — npx from GitHub</strong></p>
+        <pre>npx github:heysourin/user-pain-radar add heysourin/user-pain-radar</pre>
+        <p><strong>Option 2 — Manual clone</strong></p>
+        <pre>git clone https://github.com/heysourin/user-pain-radar.git
+# Copy the agents/ folder into your project</pre>
+        <h4>Supported tools</h4>
+        <table>
+          <tr><th>Tool</th><th>How to trigger</th></tr>
+          <tr><td>Antigravity</td><td><code>@user-pain-radar</code> mention in chat</td></tr>
+          <tr><td>Claude Code</td><td>Reference the skill file or paste its contents</td></tr>
+          <tr><td>Cursor / Other</td><td>Add <code>agents/user-pain-radar.md</code> as a system prompt / context file</td></tr>
+        </table>
+        <h4>Usage</h4>
+        <pre>@user-pain-radar find pain points about "project management tools"
+@user-pain-radar search for complaints about "home cleaning services"
+@user-pain-radar what are people struggling with in "online tutoring"</pre>
+        <h4>Output</h4>
+        <p><code>pain_points_radar.md</code> — master research log with priority-ranked opportunities, categorized pain points, scores and pricing recommendations.</p>
+      </div>
+    </details>
+
+    <details class="doc">
+      <summary>📂 File structure <span class="chev">›</span></summary>
+      <div class="body">
+        <pre>&lt;root directory&gt;/
+├── agents/
+│   ├── user-pain-radar.md          # Agent skill file (core instructions)
+│   └── utils/
+│       ├── append_results.py       # Append results to master MD file
+│       └── check_duplicates.py     # Check if topic was already researched
+├── pain_points_radar.md            # Master results file (auto-created)
+└── README.md                       # This file</pre>
+      </div>
+    </details>
+
+    <details class="doc">
+      <summary>⚙️ How it works <span class="chev">›</span></summary>
+      <div class="body">
+        <p>When triggered with a topic, the agent runs four phases: <strong>web search</strong> (12 targeted queries per platform), <strong>deep dive</strong> (reads posts AND comments), <strong>analysis &amp; categorization</strong> (scores pain × monetization), and <strong>save</strong> (writes the report).</p>
+        <h4>Search strategy</h4>
+        <table>
+          <tr><th>Platform</th><th>What it searches for</th></tr>
+          <tr><td>Reddit</td><td>"frustrated", "hate", "wish", "deal breaker"</td></tr>
+          <tr><td>Instagram</td><td>"scam", "worst service", "waste of money"</td></tr>
+          <tr><td>Facebook</td><td>"terrible service", "never again", "rip off"</td></tr>
+          <tr><td>Twitter/X</td><td>"hate", "broken", "annoying"</td></tr>
+          <tr><td>Hacker News</td><td>"frustrating", "problem", "alternative"</td></tr>
+          <tr><td>Amazon</td><td>1–2 star reviews, "don't buy", "returned it"</td></tr>
+          <tr><td>App/Play Store</td><td>low-rated reviews, "crash", "doesn't work", "terrible"</td></tr>
+          <tr><td>Product Hunt</td><td>"complaint", "missing", "wish it had"</td></tr>
+          <tr><td>Stack Overflow</td><td>"workaround", "hack", "no way to"</td></tr>
+          <tr><td>News Media</td><td>TechCrunch, The Verge — "controversy", "backlash"</td></tr>
+          <tr><td>Blogs &amp; Forums</td><td>general complaints, frustrations, "I wish" posts</td></tr>
+        </table>
+        <h4>Comment reading</h4>
+        <p>The agent <strong>always reads comments</strong>, not just posts — expanding collapsed Reddit replies, scrolling Instagram/Facebook chains, reading full Twitter threads, sorting Amazon by "Most Critical", and checking developer responses on the App/Play Store.</p>
+      </div>
+    </details>
+
+    <details class="doc">
+      <summary>🤖 Agent workflow &amp; skill spec <span class="chev">›</span></summary>
+      <div class="body">
+        <p><strong>Identity:</strong> You are <strong>User Pain Radar</strong>, an LLM-agnostic agent that finds and analyzes user pain points across the internet. When triggered with a topic, follow four phases in order.</p>
+
+        <h4>Phase 1 — Web search (12 queries)</h4>
+        <p>Run a separate web search per platform, replacing <code>{topic}</code>:</p>
+        <pre>Reddit:        site:reddit.com "{topic}" (frustrated OR annoying OR hate OR wish OR "pain point" OR "deal breaker" OR complaint)
+Hacker News:   site:news.ycombinator.com "{topic}" (problem OR issue OR frustrating OR alternative)
+Twitter/X:     site:twitter.com OR site:x.com "{topic}" (hate OR annoying OR wish OR broken OR complaint)
+Instagram:     site:instagram.com "{topic}" (frustrated OR scam OR disappointed OR "waste of money" OR "worst service")
+Facebook:      site:facebook.com "{topic}" (complaint OR frustrated OR "terrible service" OR "never again" OR "rip off")
+Product Hunt:  site:producthunt.com "{topic}" (review OR complaint OR missing OR "wish it had")
+Stack Overflow:site:stackoverflow.com "{topic}" (workaround OR hack OR "no way to" OR frustrated)
+Amazon:        site:amazon.com "{topic}" review ("1 star" OR "2 star" OR "waste of money" OR "don't buy" OR defective)
+App/Play:      ("{topic}" app review) site:apps.apple.com OR site:play.google.com ("1 star" OR bug OR crash OR "doesn't work")
+News Media:    "{topic}" (controversy OR backlash OR criticism OR outage OR recall) site:techcrunch.com OR site:theverge.com
+News &amp; Blogs:  "{topic}" (complaint OR frustration OR "pain point" OR "I wish" OR "why can't") (blog OR article OR news)
+Forums:        "{topic}" forum (complaint OR frustration OR "pain point" OR "I wish" OR "why can't")</pre>
+
+        <h4>Phase 2 — Deep dive: read posts AND comments</h4>
+        <p>⚠️ Comment reading is critical — most pain points live in comments, not posts.</p>
+        <table>
+          <tr><th>Platform</th><th>What to read</th></tr>
+          <tr><td>Reddit</td><td>Post + all comment threads; expand collapsed/downvoted replies; sort Top/Controversial</td></tr>
+          <tr><td>Instagram</td><td>Caption + scroll ALL comments and reply chains</td></tr>
+          <tr><td>Facebook</td><td>Post + all comments; expand "View more"; check Most Relevant &amp; Newest</td></tr>
+          <tr><td>Twitter/X</td><td>Tweet + full reply thread; check quote tweets</td></tr>
+          <tr><td>Hacker News</td><td>Submission + full comment tree (often the most insightful source)</td></tr>
+          <tr><td>Amazon</td><td>Sort by "Most Critical"; read review text + helpful replies</td></tr>
+          <tr><td>App/Play Store</td><td>Sort by lowest rating; read developer responses too</td></tr>
+          <tr><td>Product Hunt</td><td>Product description + discussion thread</td></tr>
+          <tr><td>Stack Overflow</td><td>Question + all answers + comment threads; accepted answers with caveats are goldmines</td></tr>
+          <tr><td>News / Blogs</td><td>Article + reader comments (Disqus, inline)</td></tr>
+          <tr><td>Forums</td><td>Full thread including ALL pages of replies</td></tr>
+        </table>
+        <p>For each pain point, record: description, source URL, platform, intensity (low/medium/high) and 1–2 direct quotes.</p>
+
+        <h4>Phase 3 — Scoring rubric</h4>
+        <p><strong>Pain intensity (1–10):</strong> 1–3 mild annoyance ("would be nice") · 4–6 clear frustration, actively seeking alternatives · 7–10 rage-quit level, "never again".</p>
+        <p><strong>Monetization potential (1–10)</strong> weighs four factors: willingness to pay (already paying for workarounds / switching), market-size signals (how many threads), existing-solutions gap, and switching cost (lock-in).</p>
+        <p><strong>Verdict:</strong> 🏆 TOP OPPORTUNITY = Pain ≥ 7 AND Monetization ≥ 7 · ⭐ Worth exploring = Pain ≥ 5 OR Monetization ≥ 5 · 💤 Low priority = both below 5.</p>
+
+        <h4>Phase 4 — Save (JSON → Markdown)</h4>
+        <p>Write <code>agents/utils/_temp_results.json</code>, then generate the report via the Python util. Schema:</p>
+        <pre>{
+  "topic": "the topic searched",
+  "timestamp": "ISO 8601 timestamp",
+  "categories": {
+    "Category Name": {
+      "pain_intensity": 8,
+      "monetization_potential": 7,
+      "suggested_pricing_tier": "Mid-ticket Service ($500-5,000/project)",
+      "reasoning": "Why this tier, based on evidence",
+      "pain_points": [
+        { "pain_point": "1-2 sentence description",
+          "source_url": "https://...",
+          "platform": "Reddit",
+          "intensity": "high",
+          "quotes": ["Direct quote 1", "Direct quote 2"] }
+      ]
+    }
+  },
+  "summary": "Executive summary (2-4 sentences)",
+  "metadata": { "sources_searched": 11, "pages_visited": 45, "pain_points_found": 67 }
+}</pre>
+
+        <h4>Important notes</h4>
+        <ul>
+          <li><strong>Go deep</strong> — visit as many relevant pages as possible; quantity AND quality matter.</li>
+          <li><strong>Read comments</strong> — never skip them; they contain the real pain points.</li>
+          <li><strong>Be specific</strong> — "the app crashes when uploading files &gt;10MB" is a pain point; "the app is bad" is not.</li>
+          <li><strong>Use exact quotes</strong> — they add credibility and specificity.</li>
+          <li><strong>Create custom categories</strong> when a clear pattern doesn't fit the defaults.</li>
+          <li><strong>Be honest with scores</strong> — base them on evidence found, don't inflate.</li>
+          <li><strong>Note the platform</strong> — HN vs Instagram complaints can signal different market segments.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="doc">
+      <summary>🏷️ Categories &amp; pricing tiers <span class="chev">›</span></summary>
+      <div class="body">
+        <h4>Categories (service-business focus)</h4>
+        <table>
+          <tr><th>Category</th><th>Examples</th></tr>
+          <tr><td>💰 Pricing &amp; Value</td><td>Hidden fees, unclear quotes, overcharging</td></tr>
+          <tr><td>📞 Communication &amp; Responsiveness</td><td>Ghosting, slow replies, poor updates</td></tr>
+          <tr><td>⭐ Quality &amp; Deliverables</td><td>Missed specs, inconsistent work</td></tr>
+          <tr><td>⏰ Reliability &amp; Timeliness</td><td>Missed deadlines, no-shows</td></tr>
+          <tr><td>🤝 Trust &amp; Transparency</td><td>Bait-and-switch, misleading promises</td></tr>
+          <tr><td>📋 Onboarding &amp; Process</td><td>Confusing intake, poor handoff</td></tr>
+          <tr><td>🛡️ Support &amp; Aftercare</td><td>No follow-up, no warranty</td></tr>
+          <tr><td>🎨 UX/UI Issues</td><td>Bad booking flow, poor website</td></tr>
+          <tr><td>🔧 Missing Capabilities</td><td>Services / features not offered, capability gaps</td></tr>
+          <tr><td>⚡ Performance &amp; Reliability</td><td>Bugs, crashes, slowness (digital / SaaS-adjacent)</td></tr>
+          <tr><td>📦 Product Quality &amp; Durability</td><td>Defects, wear, build quality (from product reviews)</td></tr>
+          <tr><td>🔗 Integration &amp; Compatibility</td><td>Interop issues, API limits</td></tr>
+          <tr><td>🏷️ Custom</td><td>Any other emerging pattern — named descriptively</td></tr>
+        </table>
+        <h4>Pricing tiers</h4>
+        <table>
+          <tr><th>Tier</th><th>Model</th><th>When</th></tr>
+          <tr><td>💚 Free / Lead Magnet</td><td>$0</td><td>Free consultation to acquire clients</td></tr>
+          <tr><td>💛 Low-ticket</td><td>$50–500/project · $25–75/hr</td><td>Small one-off tasks</td></tr>
+          <tr><td>🟠 Mid-ticket</td><td>$500–5K/project · $75–200/hr</td><td>Professional services</td></tr>
+          <tr><td>🔴 High-ticket</td><td>$5K–25K/project · $1K–5K/mo</td><td>Complex engagements</td></tr>
+          <tr><td>🟣 Premium</td><td>$25K+/project · $5K+/mo</td><td>Strategic partnerships</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <details class="doc">
+      <summary>🐍 Python utilities <span class="chev">›</span></summary>
+      <div class="body">
+        <p>All utilities use <strong>Python stdlib only</strong> — no pip installs required.</p>
+        <h4>append_results.py</h4>
+        <p>Appends research results from a JSON file to the master Markdown file (deduplication by URL + text hash, prepend/newest-first, auto-create).</p>
+        <pre>python agents/utils/append_results.py --input agents/utils/_temp_results.json --output pain_points_radar.md</pre>
+        <h4>check_duplicates.py</h4>
+        <p>Checks if a topic has already been researched.</p>
+        <pre>python agents/utils/check_duplicates.py --topic "project management tools" --results-file pain_points_radar.md</pre>
+      </div>
+    </details>
+
+    <details class="doc">
+      <summary>🔒 Security notes <span class="chev">›</span></summary>
+      <div class="body">
+        <p>User Pain Radar is <strong>not a web service</strong>. It ships a local installer (<code>bin/cli.js</code>), two local Python scripts, and the agent prompt run by <em>your</em> AI assistant. There is <strong>no HTTP server, listening port, public endpoint, or outbound network call</strong> in the tracked code.</p>
+        <table>
+          <tr><th>Common ask</th><th>Status</th></tr>
+          <tr><td>Rate limiting on public endpoints</td><td><strong>N/A</strong> — nothing listens on a network.</td></tr>
+          <tr><td>Brute-force / credential-stuffing prevention</td><td><strong>N/A</strong> — no login, password, session, or token to brute-force.</td></tr>
+          <tr><td>Remove hard-coded API keys</td><td><strong>N/A</strong> — the code contains no keys; it uses the host assistant's own capabilities.</td></tr>
+          <tr><td>Input validation &amp; sanitization</td><td><strong>Implemented</strong> (see below).</td></tr>
+        </table>
+        <h4>Hardening applied (OWASP-aligned)</h4>
+        <ul>
+          <li><strong>OS command injection</strong> (<code>bin/cli.js</code>): clone uses <code>execFileSync('git', […])</code> — no shell spawned; <code>--</code> prevents option injection; the repo ref is allowlist-validated.</li>
+          <li><strong>Untrusted JSON → Markdown</strong> (<code>append_results.py</code>): 5 MB size guard, type checks, bounds caps, score clamping to 0–10, Markdown/table-injection sanitization (forged dedup markers neutralized), and URL sanitization (only http(s) emitted).</li>
+          <li><strong>Read-path DoS guard</strong> (<code>check_duplicates.py</code>): skips the scan if the results file exceeds 25 MB.</li>
+        </ul>
+        <p>If you wire this skill into a hosted service that <em>does</em> expose endpoints, add rate limiting and authentication at that layer — it does not belong in these local scripts.</p>
+        <h4>If you add authentication later — brute-force checklist</h4>
+        <p>None of this applies to the current code (there's no auth), but if a fork adds a login or token check, protect that surface (OWASP A07 — Identification &amp; Authentication Failures):</p>
+        <ul>
+          <li>Throttle attempts per identifier <em>and</em> per IP — escalating delay / temporary lockout after N failures (e.g. 5–10), with a cooldown.</li>
+          <li>Prefer exponential backoff over hard lockout where account-lockout DoS is a concern.</li>
+          <li>Constant-time secret comparison (<code>crypto.timingSafeEqual</code> / <code>hmac.compare_digest</code>) so timing can't leak how close a guess was.</li>
+          <li>Hash passwords with a slow, salted KDF (argon2id / bcrypt / scrypt) — never store or compare plaintext.</li>
+          <li>Generic failure messages ("invalid credentials") — never reveal which field was wrong.</li>
+          <li>CAPTCHA / step-up / MFA after repeated failures, and alerting on spikes.</li>
+          <li>Log auth failures (without logging the attempted secret) for monitoring.</li>
+        </ul>
+        <h4>Handling secrets, if you ever add them</h4>
+        <ol>
+          <li>Read from an environment variable (<code>process.env.X</code> / <code>os.environ["X"]</code>).</li>
+          <li>Keep it in a git-ignored <code>.env</code>; commit only a <code>.env.example</code> with placeholder values.</li>
+          <li>Never embed a key in client-side / shipped code, and rotate immediately if one is ever committed — git history retains it, so rotation is the only real fix.</li>
+        </ol>
+      </div>
+    </details>
+
+    <details class="doc">
+      <summary>📜 License &amp; credits <span class="chev">›</span></summary>
+      <div class="body">
+        <p><strong>MIT</strong> — use it however you want. Project: <a href="https://github.com/heysourin/user-pain-radar" target="_blank" rel="noopener noreferrer">github.com/heysourin/user-pain-radar ↗</a>.</p>
+      </div>
+    </details>
+
+    <h2 class="sec">📅 Research log — "project management tools"</h2>
+    <div class="exec">
+      <div class="meta">
+        <span class="pill">11 platforms searched</span>
+        <span class="pill">74 pages visited</span>
+        <span class="pill">51 pain points found</span>
+        <span class="pill">2026-06-25</span>
+      </div>
+      <p>Across 11+ platforms, the loudest and most emotional complaints about project management tools cluster around two themes: chronic <b>slowness/unreliability</b> (Jira, ClickUp, Asana, Wrike, Trello all described as painfully slow, freezing, crashing, or losing data) and aggressive/opaque <b>pricing</b> (Atlassian's 2024–25 increases of 124–233%, Monday.com's seat-bucket and AI-bundle upsells, Asana's hidden 2-seat minimum). A strong secondary cluster is overwhelming complexity and onboarding pain. These map cleanly to high-value service opportunities: implementation/optimization consulting, migrations, fractional admin/training, and custom integration work.</p>
+    </div>
+
+    <div class="up-progress">
+      <div class="row">
+        <span class="label">🩹 Pains resolved</span>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <span class="count" id="up-count">0 / 0</span>
+          <button class="up-reset" id="up-reset" type="button">Reset</button>
+        </div>
+      </div>
+      <div class="up-bar"><span id="up-fill"></span></div>
+    </div>
+    <p class="up-hint">Tick the small box on any pain point once your product/service has solved it — so users no longer feel it. Progress is saved in this browser.</p>
+
+    <div class="alldone" id="up-alldone">🎉 Every pain point is marked resolved — users no longer need to be in pain!</div>
+
+    <div id="up-cats"></div>
+  </main>
+
+  <footer class="site">
+    <div class="inner">
+      <div class="col">
+        <a class="brand" href="/"><span class="bolt">⚡</span> Everything You Need</a>
+        <p style="color:var(--muted);font-size:14px;margin-top:12px;max-width:240px;">AI tools & resources that work while you sleep.</p>
+      </div>
+      <div class="col"><h4>Explore</h4><a href="/library.html">Library</a><a href="/free-llm-apis.html">Free LLM APIs</a><a href="/links.html">Links</a><a href="/checklist.html">Checklist</a><a href="/userpain.html">User Pain</a></div>
+      <div class="col"><h4>Links</h4><a href="/websites.html">Websites</a><a href="/github.html">GitHub</a><a href="/docs.html">Docs</a><a href="/notion.html">Notion</a><a href="/discord.html">Discord</a></div>
+      <div class="col"><h4>Legal</h4><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/contact.html">Contact</a></div>
+    </div>
+    <div class="bottom">© 2026 AI Tools. All rights reserved.</div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+  <script>
+  (function () {
+    var DATA = [
+      { icon:"💰", name:"Pricing & Value", pain:8, mon:8, score:64, verdict:"top", pricing:"🟠 Mid-ticket ($500–5K/project · $75–200/hr)",
+        why:"Teams are actively paying 124–233% more after forced upgrades and seat-bucket tricks, and many say ROI 'no longer feels worth it'. Vendor-neutral cost-optimization audits and migrations are an easy mid-ticket sell because the savings dwarf the fee.",
+        points:[
+          { t:`Atlassian's Oct 2024 cloud pricing overhaul produced far larger increases than the 5–10% customers were warned about, with Enterprise licenses and third-party apps jumping 150–233%, forcing teams to cut Jira usage.`, src:{l:"Forum",u:"https://community.atlassian.com/forums/Jira-questions/Massive-Price-Increase-for-Jira-Cloud-Enterprise-and-Apps/qaq-p/2969785"}, hi:true, q:`Enterprise cost increase was 153%` },
+          { t:`Monday.com's seat-bucket pricing forces teams to buy in blocks of 5, so adding a single user can double the bill, and real per-seat cost balloons to $30–50 after add-ons.`, src:{l:"Blog",u:"https://bridgeapp.ai/resources/blog/mondaycom-pricing-in-2026-how-much-does-it-cost-and-why-it-keeps-changing"}, hi:true, q:`When we had 5 users and added a 6th one, we got billed for 10 onwards ($120)` },
+          { t:`Monday.com has aggressively raised prices over the past two years, locking key features and integrations behind higher tiers, so users feel the ROI no longer justifies company-wide use.`, src:{l:"Capterra",u:"https://www.capterra.com/p/147657/monday-com/reviews/"}, hi:true, q:`the past 2 years have seen aggressive price increases from monday.com, and the R...` },
+          { t:`Monday.com renewal pricing jumped from roughly $32 to $65 per user as discounted bundles were replaced, and users report being forced to buy expensive AI bundles with no opt-out.`, src:{l:"Reddit",u:"https://pricinginnovation.substack.com/p/analysis-of-mondaycoms-new-pricing"}, hi:false, q:`their renewal bumped them from $32 to $65 per user` },
+          { t:`Asana's pricing defaults trick small teams by auto-populating multiple seats and enforcing a two-seat minimum, so a single user must pay for two.`, src:{l:"App Store",u:"https://apps.apple.com/us/app/asana-work-management/id489969512?see-all=reviews"}, hi:true, q:`automatically put you with 5 seats which might trick people into thinking you ha...` },
+          { t:`Asana's pricing page does not clearly disclose the 2-seat minimum, so a freelancer spent a whole day evaluating it before discovering they'd be forced to pay for a seat they don't need.`, src:{l:"Forum",u:"https://forum.asana.com/t/please-please-make-it-clear-on-the-pricing-page-there-is-a-minimum-of-2-seats/256171"}, hi:false, q:`Please please make it clear on the pricing page there is a minimum of 2 seats!` },
+          { t:`Trello's reliance on paid Power-Ups for basic features inflates real cost to $15–40/user/month, more than competitors that include those features natively, while critical Timeline and Calendar views are paywalled.`, src:{l:"Blog",u:"https://www.appfox.io/blog/how-to-manage-your-trello-power-up-limits/"}, hi:false, q:`Adding 3-4 Power-Ups to get features that competitors include natively can cost ...` },
+          { t:`Jira/Confluence pricing isn't sensitive to smaller orgs, and killing off self-hosted Server in favor of Cloud/Data Center is seen as absurdly expensive and unnecessary for small teams.`, src:{l:"Hacker News",u:"https://news.ycombinator.com/item?id=33582264"}, hi:false, q:`the end of everything except the datacenter plans, which are just super not nece...` },
+          { t:`Jira becomes prohibitively expensive for larger teams once add-on plugins are factored in, making the cost hard to justify.`, src:{l:"Capterra",u:"https://www.capterra.com/p/19319/JIRA/reviews/"}, hi:false, q:`It is expensive if you use it for a large team, and it is not easy to justify th...` }
+        ]},
+      { icon:"⚡", name:"Performance & Reliability", pain:9, mon:7, score:63, verdict:"top", pricing:"🟠 Mid-ticket ($500–5K/project · $75–200/hr)",
+        why:"Slowness, freezes, crashes and data loss are the single most frequent and most emotional complaint across every tool. Performance/optimization audits, instance tuning, and 'make-it-fast' migration projects sell well because the pain is felt daily by paying teams.",
+        points:[
+          { t:`Jira is consistently, painfully slow — every click brings a multi-second spinner, with one user's instance taking over 13 seconds just to finish loading before the page would let them scroll.`, src:{l:"Hacker News",u:"https://news.ycombinator.com/item?id=25594451"}, hi:true, q:`There's a hundred small issues with Jira, but there's one huge one: It's slow. R...` },
+          { t:`Typing into Jira's ticket description field lags and spins up laptop fans, indicating the front-end does excessive work on simple text input.`, src:{l:"Hacker News",u:"https://news.ycombinator.com/item?id=25594451"}, hi:true, q:`Typing in the description field of a ticket lags and spins up the fans on my lap...` },
+          { t:`Jira takes ~5 seconds to perform trivial operations like reporting that you have 3 bugs open, which engineers find baffling.`, src:{l:"Hacker News",u:"https://news.ycombinator.com/item?id=28388564"}, hi:false, q:`JIRA takes 5 seconds to say 'you have 3 bugs open'. How is it even possible? Lik...` },
+          { t:`Jira's clunky, heavy UI takes seconds just to open a single ticket or update a status during routine work, with non-intuitive navigation between screens.`, src:{l:"Capterra",u:"https://www.capterra.com/p/19319/JIRA/reviews/"}, hi:true, q:`Taking seconds just to load a single ticket or update a status gets annoying` },
+          { t:`ClickUp is persistently slow years after users first complained, with a half-second delay on every task interaction and a near-unusable search that makes 10-minute work stretch past 30.`, src:{l:"Forum",u:"https://feedback.clickup.com/feature-requests/p/make-it-faster"}, hi:true, q:`little, pesky half a second delay that I have to wait for every single task` },
+          { t:`ClickUp's desktop app freezes and crashes (macOS tested), feels like a PWA rather than a native app, and in one case made a task take 3x longer than normal.`, src:{l:"Reddit",u:"https://feedback.clickup.com/feature-requests/p/make-it-faster"}, hi:true, q:`feels like a PWA rather than a native smooth snappy app` },
+          { t:`ClickUp suffers from data-integrity bugs: the app freezes/crashes and tasks disappear or get deleted without warning, with users reporting data loss or corruption.`, src:{l:"Blog",u:"https://www.jibble.io/reviews/clickup/5-ways-clickup-sucks"}, hi:true, q:`data loss or corruption` },
+          { t:`ClickUp's recurring-tasks bug fails to regenerate tasks correctly and has stayed unfixed for over a year, forcing users to manually hunt for missing tasks.`, src:{l:"App Store",u:"https://apps.apple.com/us/app/clickup-tasks-chat-docs-ai/id1535098836?see-all=reviews&platform=ipad"}, hi:true, q:`a bug with recurring tasks not regenerating correctly STILL hasn't been fixed af...` },
+          { t:`Asana's web app became so slow that typing a sentence took ~30 seconds to appear one character at a time, scrolling jumps under the mouse, and dragging list items takes 3+ tries — on a recent Mac with a fast connection.`, src:{l:"Hacker News",u:"https://news.ycombinator.com/item?id=15125572"}, hi:true, q:`I type a sentence into the UI and it takes about 30 seconds for the text to appe...` },
+          { t:`Asana is so slow that users dread clicking an Asana notification email because they know the experience will be slow and annoying — even in Chrome.`, src:{l:"Hacker News",u:"https://news.ycombinator.com/item?id=12977167"}, hi:false, q:`I don't want to click it because I know the whole experience is slow slow slow a...` },
+          { t:`Wrike has a horrifically slow UI — impossible to run sprint planning or walk through in-progress work during a stand-up, and one user found it actually slower than Jira.`, src:{l:"Hacker News",u:"https://news.ycombinator.com/item?id=28388564"}, hi:true, q:`Wrike has a horrifically slow UI. It's impossible to run a sprint planning on it` },
+          { t:`Wrike became very slow after removing list view and introducing Table View, with admins fielding daily user complaints about slow loading.`, src:{l:"Capterra",u:"https://www.capterra.com/p/76113/Wrike/reviews/"}, hi:true, q:`Wrike has been very slow since getting rid of list view and introducing Table Vi...` },
+          { t:`Trello's Mac app freezes after inactivity and loses in-progress cards, resetting to the home page and forcing a force-quit, making it unreliable for all-day use.`, src:{l:"App Store",u:"https://apps.apple.com/us/app/trello/id1278508951?mt=12&see-all=reviews&platform=mac"}, hi:true, q:`after a few moments of inactivity, the window seems to constantly freeze` },
+          { t:`Smartsheet's app is the slowest to load among users' tools, sometimes requiring several reloads before it becomes available.`, src:{l:"Capterra",u:"https://www.capterra.com/p/79104/Smartsheet/reviews/"}, hi:false, q:`The app is slowest to load, sometimes taking several reloads to become available` },
+          { t:`Notion becomes slow and cluttered as pages grow heavier with embeds, large tables, or long docs, and its Android app is plagued by lag, typing glitches, crashes, and syncing problems.`, src:{l:"Capterra",u:"https://www.capterra.com/p/186596/Notion/reviews/"}, hi:false, q:`Notion can start to feel slow and cluttered as pages get heavier (lots of embeds...` }
+        ]},
+      { icon:"📋", name:"Onboarding & Process", pain:7, mon:8, score:56, verdict:"top", pricing:"🟠 Mid-ticket ($500–5K/project · $75–200/hr)",
+        why:"Jira, ClickUp, Notion and Monday are all described as 'overwhelming' with steep learning curves that take teams weeks to absorb. Implementation, configuration, training and fractional-admin retainers have clear willingness-to-pay and recurring revenue.",
+        points:[
+          { t:`Jira's overwhelming complexity and number of configuration options create a steep learning curve, making it easy to over-engineer and hard for new users to find functions.`, src:{l:"Capterra",u:"https://www.capterra.com/p/19319/JIRA/reviews/"}, hi:true, q:`Jira can feel overwhelming for new users because of the number of configuration ...` },
+          { t:`Jira's configuration is split across duplicated project-level and general settings with hidden dependencies, making even simple changes 'insanely complicated.'`, src:{l:"Blog",u:"https://mariachec.medium.com/why-i-hate-jira-how-to-overcome-it-creating-new-jira-project-faeea3d2aede"}, hi:true, q:`It is extremely complicated to setup anything in it.` },
+          { t:`Jira's permission lockdown turns it into a source of busy work — one user said after switching it became so locked down with arbitrary mandated rules that they need to take a break every time they use it.`, src:{l:"Hacker News",u:"https://news.ycombinator.com/item?id=28388564"}, hi:true, q:`it has become a source of busy work, that requires extra employees to use proper...` },
+          { t:`ClickUp's interface is an overwhelming, cluttered 'fire hose' with long, complicated onboarding that takes new teams a long time to acclimate to.`, src:{l:"Blog",u:"https://www.jibble.io/reviews/clickup/5-ways-clickup-sucks"}, hi:false, q:`It feels like a cluttered mess` },
+          { t:`ClickUp has so many features that simply finding the thing you need to do takes a long time, making onboarding new people increasingly difficult.`, src:{l:"Hacker News",u:"https://news.ycombinator.com/item?id=24821840"}, hi:false, q:`It has so many features that finding the thing to do takes a lot of time.` },
+          { t:`Notion's steep learning curve means users spend weeks or months mastering databases and formulas only to feel the tool slows them down.`, src:{l:"Blog",u:"https://medium.com/@ruslansmelniks/why-users-abandon-notion-complexity-limitations-and-the-rise-of-ai-alternatives-cba91a95b535"}, hi:false, q:`users often spend more time learning and configuring than actually getting work ...` },
+          { t:`Monday.com's highly customizable interface overwhelms new users, with features hard to locate during initial board, automation, and integration setup.`, src:{l:"G2",u:"https://www.g2.com/products/monday-com/reviews"}, hi:false, q:`18% of reviewers point to issues with the platform's user interface and intuitiv...` },
+          { t:`Migrating between teams/projects in Jira is messy — duplicating/migrating old tickets loses context, and onboarding casual users like a marketer who just needs to watch a few tickets is painful.`, src:{l:"Hacker News",u:"https://news.ycombinator.com/item?id=10871076"}, hi:false, q:`It's messy, and context is always difficult to manage.` }
+        ]},
+      { icon:"🔧", name:"Missing Capabilities", pain:6, mon:7, score:42, verdict:"explore", pricing:"🟠 Mid-ticket ($500–5K/project)",
+        why:"Users repeatedly bolt on Power-Ups, second tools and workarounds to cover gaps (Gantt, dependencies, reporting, checklist assignment). Building custom apps/Power-Ups/integrations targets a clear, paying gap, though it's tool-specific and more fragmented.",
+        points:[
+          { t:`Trello lacks native essentials (Gantt charts, time tracking, task dependencies, reporting), forcing teams onto Power-Ups and into automation limits within weeks.`, src:{l:"Blog",u:"https://blog.herdr.io/work-management/title-top-5-complaints-about-trello-in-2025-what-users-are-saying/"}, hi:false, q:`Essential tools like Gantt charts, time tracking, and comprehensive reporting ar...` },
+          { t:`Trello's collaboration model is too limited — you can't assign checklist items and can't have discussions on checklist items, forcing teams into workarounds.`, src:{l:"Hacker News",u:"https://news.ycombinator.com/item?id=10871076"}, hi:false, q:`cant assign checklist items, can't have discussion on checklist items.` },
+          { t:`Linear intentionally limits customization (only 5 default statuses, limited per-team workflows) and is too engineering-focused, leaving marketing/sales teams needing a second tool.`, src:{l:"Blog",u:"https://tech-insider.org/linear-vs-jira-2026/"}, hi:false, q:`Linear is very limited for non-engineering teams—marketing and sales teams will ...` },
+          { t:`Monday.com's automations and workflows are complex with limited troubleshooting, the single most-cited complaint, and many automations are locked to higher plans.`, src:{l:"G2",u:"https://www.g2.com/products/monday-com/reviews"}, hi:false, q:`25% of reviewers... pertains to automations and workflows, specifically their co...` },
+          { t:`Asana's search is clunky and rarely helpful, so when users don't find information they have very low confidence it isn't actually there — undermining trust in it as a source of truth.`, src:{l:"Hacker News",u:"https://news.ycombinator.com/item?id=10871076"}, hi:false, q:`I find the search clunky and rarely helpful.` },
+          { t:`Basecamp projects quickly turn into 'checklist hell' — you cannot connect anything to its user story, and calendaring is poor.`, src:{l:"Hacker News",u:"https://news.ycombinator.com/item?id=10871076"}, hi:false, q:`projects quickly turn into checklist hell, cannot connect ANYTHING to it's user ...` },
+          { t:`Asana's iOS app lacks feature parity with desktop, including the inability to create a new team in the app — a gap users say was requested over five years ago.`, src:{l:"App Store",u:"https://apps.apple.com/us/app/asana-work-management/id489969512?see-all=reviews"}, hi:false, q:`can't create a new team on the app, only on the computer` }
+        ]},
+      { icon:"🤝", name:"Trust & Transparency", pain:7, mon:6, score:42, verdict:"explore", pricing:"🟠 Mid-ticket ($500–5K/project)",
+        why:"Forced upgrades, feature-stripping and 'bait-and-switch' framing have eroded trust in incumbents, creating demand for vendor-neutral advisory and tool-selection consulting. Monetization is solid but indirect — clients buy peace of mind.",
+        points:[
+          { t:`Atlassian moved core ITSM capabilities out of Jira Service Management Standard into Premium-only, a ~124% per-agent price hike for the same functionality teams already had.`, src:{l:"Blog",u:"https://softwarepricingguide.com/atlassian-jira-pricing-2025-every-plan-the-data-center-vs-cloud-cost-decision-and-the-price-increases-nobody-warned-you-about/"}, hi:true, q:`the forced upgrade to Premium represents a 124% per-agent price increase ($21.42...` },
+          { t:`Users perceive ClickUp's pricing as a bait-and-switch, claiming features are offered then revoked without notice and the free tier pushes forced team-wide upgrades.`, src:{l:"App Store",u:"https://apps.apple.com/us/app/clickup-tasks-chat-docs-ai/id1535098836?see-all=reviews&platform=ipad"}, hi:true, q:`pricing structure is one big bait and switch scheme` },
+          { t:`Users feel Atlassian optimizes only for the buyer (management) and ignores actual users — once management is sold, the tool can pile 50 fields you don't need onto a form with no incentive to fix usability.`, src:{l:"Hacker News",u:"https://news.ycombinator.com/item?id=25594451"}, hi:false, q:`once they convinced management to use your product you no longer need to worry a...` }
+        ]},
+      { icon:"🎨", name:"UX/UI Issues", pain:7, mon:5, score:35, verdict:"explore", pricing:"💛 Low-ticket ($50–500/project · $25–75/hr)",
+        why:"Clutter, broken navigation and notification overload generate constant low-grade frustration but are largely the vendor's to fix; the serviceable slice is workspace cleanup, view/template design, and notification-hygiene setup — real but lower-ticket.",
+        points:[
+          { t:`Jira's redesigned 'new experience' UI broke navigation: switching projects and reaching boards or JQL filters takes extra clicks and full page reloads, and admin-designed field layouts are ignored.`, src:{l:"Forum",u:"https://community.atlassian.com/forums/Jira-questions/Anyone-else-hate-the-new-jira-experience/qaq-p/684161"}, hi:true, q:`Navigation is really hard` },
+          { t:`Asana floods users with notifications — 10 edits trigger 10 separate notifications, and uploading 47 photos sends 47 emails to every collaborator, driving overwhelm and missed messages.`, src:{l:"Blog",u:"https://www.misssamanthaelizabeth.com/blog/asana-notifications"}, hi:false, q:`the volume of emails coming out of Asana is significant enough to make some cons...` },
+          { t:`ClickUp's iPad/mobile app feels like an unpolished web wrapper that loads slowly and lacks the strength of the desktop version, making it nearly unusable for tablet users.`, src:{l:"App Store",u:"https://apps.apple.com/us/app/clickup-tasks-chat-docs-ai/id1535098836?see-all=reviews&platform=ipad"}, hi:true, q:`Hot garbage for tablet users` },
+          { t:`Asana's iPad calendar view only shows one day at a time, defeating the purpose of a calendar's bird's-eye overview.`, src:{l:"App Store",u:"https://apps.apple.com/us/app/asana-work-management/id489969512?see-all=reviews"}, hi:false, q:`I can only see one day at a time rather than a bird's eye view` },
+          { t:`Atlassian deliberately hides UI features based on role/permissions, so users don't know capabilities exist and resort to horrible manual processes or stuffing shell scripts into Bamboo.`, src:{l:"Hacker News",u:"https://news.ycombinator.com/item?id=28388564"}, hi:false, q:`their tools often have features that you simply do not know about because your r...` }
+        ]},
+      { icon:"🔗", name:"Integration & Compatibility", pain:5, mon:7, score:35, verdict:"explore", pricing:"🟠 Mid-ticket ($500–5K/project · $75–200/hr)",
+        why:"Developers hit undocumented API rate limits and pagination gaps and build their own retry/queue workarounds — exactly the kind of custom integration and middleware work agencies bill for. Audience is smaller but technical and well-funded.",
+        points:[
+          { t:`Asana's API enforces rate limits (429s) that fire even within documented limits, and pagination is unavailable when searching tasks despite specifying a limit, forcing custom retry queues.`, src:{l:"Stack Overflow",u:"https://forum.asana.com/t/pagination-not-available-even-when-the-limit-parameter-is-specified/95338"}, hi:false, q:`running into unexpected rate limit issues... even though their usage appears to ...` },
+          { t:`Jira Cloud's API rate limits (~500 requests per 5 minutes) and undisclosed per-app limits force developers to split bulk operations across time windows, making integrations hard to plan.`, src:{l:"Stack Overflow",u:"https://developer.atlassian.com/cloud/jira/platform/rate-limiting/"}, hi:false, q:`500 API requests per 5 minutes, requiring developers to split bulk operations` }
+        ]},
+      { icon:"🛡️", name:"Support & Aftercare", pain:6, mon:5, score:30, verdict:"explore", pricing:"🟠 Mid-ticket ($1K–5K/mo retainer)",
+        why:"Paying customers report slow support with no 24/7 availability even at high spend, opening room for managed-support and fractional-admin retainers. Recurring revenue is attractive, but it competes with the vendor's own support.",
+        points:[
+          { t:`Asana customer support is slow with no 24/7 availability, leaving paying users stranded on account-recovery and troubleshooting despite paying thousands of dollars.`, src:{l:"App Store",u:"https://apps.apple.com/us/app/asana-work-management/id489969512?see-all=reviews"}, hi:true, q:`no 24/7 support` },
+          { t:`Monday.com's Standard automation cap (250 actions/month) is exhausted within the first week by even light automation, and users report crashes and unreliable features.`, src:{l:"Blog",u:"https://www.capterra.com/p/147657/monday-com/reviews/"}, hi:false, q:`A ten-person team with even light automation can burn through 250 actions in the...` }
+        ]}
+    ];
+
+    var KEY = "userpain-resolved-v1";
+    var state = {};
+    try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { state = {}; }
+
+    var catsEl = document.getElementById("up-cats");
+    var countEl = document.getElementById("up-count");
+    var fillEl = document.getElementById("up-fill");
+    var alldoneEl = document.getElementById("up-alldone");
+    var boxes = [];
+    var total = 0;
+
+    DATA.forEach(function (cat, ci) {
+      var card = document.createElement("section");
+      card.className = "cat";
+
+      var head = document.createElement("div");
+      head.className = "chead";
+      head.innerHTML =
+        '<h3>' + cat.icon + ' ' + cat.name + '</h3>' +
+        '<span class="verdict ' + cat.verdict + '">' + (cat.verdict === "top" ? "🏆 TOP OPPORTUNITY" : "⭐ WORTH EXPLORING") + '</span>' +
+        '<span class="cresolved" data-cat="' + ci + '"></span>';
+      card.appendChild(head);
+
+      var scores = document.createElement("div");
+      scores.className = "scores";
+      scores.innerHTML =
+        '<span>Pain <b>' + cat.pain + '/10</b></span>' +
+        '<span>Monetization <b>' + cat.mon + '/10</b></span>' +
+        '<span>Score <b>' + cat.score + '/100</b></span>' +
+        '<span class="pricing">' + cat.pricing + '</span>';
+      card.appendChild(scores);
+
+      var why = document.createElement("p");
+      why.className = "why";
+      why.textContent = "💡 " + cat.why;
+      card.appendChild(why);
+
+      cat.points.forEach(function (pt, pi) {
+        var id = "c" + ci + "p" + pi;
+        total++;
+        var row = document.createElement("label");
+        row.className = "pp" + (state[id] ? " done" : "");
+
+        var box = document.createElement("input");
+        box.type = "checkbox";
+        box.checked = !!state[id];
+
+        var body = document.createElement("div");
+        body.className = "pbody";
+
+        var txt = document.createElement("div");
+        txt.className = "ptext";
+        txt.textContent = pt.t;
+
+        var meta = document.createElement("div");
+        meta.className = "pmeta";
+        meta.innerHTML =
+          '<span class="chip ' + (pt.hi ? "hi" : "med") + '">' + (pt.hi ? "🔴 High" : "🟡 Medium") + '</span>' +
+          '<a class="src" href="' + pt.src.u + '" target="_blank" rel="noopener noreferrer">' + pt.src.l + ' ↗</a>' +
+          '<span class="quote">“' + pt.q + '”</span>';
+
+        body.appendChild(txt);
+        body.appendChild(meta);
+        row.appendChild(box);
+        row.appendChild(body);
+        card.appendChild(row);
+
+        box.addEventListener("change", function () {
+          state[id] = box.checked;
+          row.classList.toggle("done", box.checked);
+          save();
+          render();
+        });
+        boxes.push({ box: box, ci: ci });
+      });
+
+      catsEl.appendChild(card);
+    });
+
+    function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+    function render() {
+      var done = boxes.filter(function (b) { return b.box.checked; }).length;
+      countEl.textContent = done + " / " + total;
+      fillEl.style.width = (total ? Math.round(done / total * 100) : 0) + "%";
+      alldoneEl.classList.toggle("show", done === total && total > 0);
+      DATA.forEach(function (cat, ci) {
+        var grp = boxes.filter(function (b) { return b.ci === ci; });
+        var gd = grp.filter(function (b) { return b.box.checked; }).length;
+        var el = catsEl.querySelector('.cresolved[data-cat="' + ci + '"]');
+        if (el) el.textContent = gd + "/" + grp.length + " resolved";
+      });
+    }
+
+    document.getElementById("up-reset").addEventListener("click", function () {
+      state = {}; save();
+      boxes.forEach(function (b) { b.box.checked = false; b.box.closest(".pp").classList.remove("done"); });
+      render();
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>

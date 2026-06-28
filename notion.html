@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notion — Pages</title>
+<meta name="description" content="Notion pages & boards.">
+<link rel="stylesheet" href="/static/styles.css">
+<link rel="stylesheet" href="/static/linkpage.css">
+</head>
+<body class="lp">
+  <canvas id="bg-canvas"></canvas>
+  <nav>
+    <a class="brand" href="/"><span class="bolt">⚡</span> Everything You Need</a>
+    <div class="nav-links">
+      <a href="/free-llm-apis.html">Free LLM APIs</a>
+      <a href="/library.html">Library</a>
+      <a href="/links.html" class="active">Links</a>
+      <span id="nav-auth"></span>
+    </div>
+  </nav>
+  <header class="lp-hero">
+    <a class="back" href="/links.html">← All Links</a>
+    <div><span class="eyebrow-pill">📝 Pages &amp; boards</span></div>
+    <h1><span class="g">Notion</span></h1>
+    <p>Notion docs and boards. Private links open only for people with workspace access.</p>
+  </header>
+
+  <main class="lp-grid" id="grid"></main>
+
+  <footer class="site">
+    <div class="inner">
+      <div class="col">
+        <a class="brand" href="/"><span class="bolt">⚡</span> Everything You Need</a>
+        <p style="color:var(--muted);font-size:14px;margin-top:12px;max-width:240px;">AI tools & resources that work while you sleep.</p>
+      </div>
+      <div class="col"><h4>Explore</h4><a href="/library.html">Library</a><a href="/free-llm-apis.html">Free LLM APIs</a><a href="/links.html">Links</a></div>
+      <div class="col"><h4>Links</h4><a href="/websites.html">Websites</a><a href="/github.html">GitHub</a><a href="/docs.html">Docs</a><a href="/notion.html">Notion</a><a href="/discord.html">Discord</a></div>
+      <div class="col"><h4>Legal</h4><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/contact.html">Contact</a></div>
+    </div>
+    <div class="bottom">© 2026 AI Tools. All rights reserved.</div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+  <script src="/static/links-data.js"></script>
+  <script>window.PAGE = {"cat": "Notion", "palette": [[0.95, 0.95, 0.95], [0.6, 0.62, 0.66], [0.8, 0.7, 0.99]], "shapeCols": [15067115, 10265519, 12616956]};</script>
+  <script type="module" src="/static/linkpage.js"></script>
+</body>
+</html>

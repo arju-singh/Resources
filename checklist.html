@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SaaS Pre-Launch Checklist — Everything You Need</title>
+<meta name="description" content="A practical checklist of everything to verify before launching your SaaS.">
+<link rel="stylesheet" href="/static/styles.css">
+<link rel="stylesheet" href="/static/linkpage.css">
+<style>
+  .cl-wrap { max-width: 860px; margin: 0 auto; padding: 0 24px 60px; }
+  .cl-progress { position: sticky; top: 0; z-index: 5; background: rgba(10,10,11,.85); backdrop-filter: blur(10px); padding: 16px 0 14px; margin-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .cl-progress .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
+  .cl-progress .label { font-size: 14px; font-weight: 700; color: var(--text); }
+  .cl-progress .count { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .cl-bar { height: 8px; border-radius: 100px; background: var(--panel2); overflow: hidden; }
+  .cl-bar > span { display: block; height: 100%; width: 0; background: var(--grad); border-radius: 100px; transition: width .35s ease; }
+  .cl-reset { background: var(--panel); border: 1px solid var(--border); color: var(--muted); padding: 7px 14px; border-radius: 100px; font-size: 12px; font-weight: 700; cursor: pointer; transition: color .15s, border-color .15s; }
+  .cl-reset:hover { color: var(--text); border-color: #c084fc; }
+
+  .cl-group { background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 22px 24px; margin: 18px 0; }
+  .cl-group > h2 { font-size: 19px; margin: 0 0 4px; display: flex; align-items: center; gap: 10px; }
+  .cl-group .grp-meta { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 14px; }
+
+  .cl-item { display: flex; align-items: flex-start; gap: 12px; padding: 11px 12px; border-radius: 12px; cursor: pointer; transition: background .12s; user-select: none; }
+  .cl-item:hover { background: var(--panel2); }
+  .cl-item.sub { margin-left: 26px; }
+  .cl-item input { appearance: none; -webkit-appearance: none; flex: 0 0 auto; width: 20px; height: 20px; margin: 1px 0 0; border: 2px solid var(--border); border-radius: 6px; background: var(--bg); cursor: pointer; position: relative; transition: border-color .15s, background .15s; }
+  .cl-item input:hover { border-color: #c084fc; }
+  .cl-item input:checked { background: linear-gradient(135deg,#c084fc,#f0abfc); border-color: #c084fc; }
+  .cl-item input:checked::after { content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #0a0a0b; font-size: 13px; font-weight: 900; }
+  .cl-item .txt { font-size: 15px; color: var(--text); line-height: 1.45; }
+  .cl-item input:checked ~ .txt { color: var(--muted); text-decoration: line-through; text-decoration-color: rgba(161,161,170,.5); }
+
+  .cl-done-banner { display: none; text-align: center; background: rgba(192,132,252,.1); border: 1px solid rgba(192,132,252,.4); color: #f0abfc; border-radius: 14px; padding: 16px; font-weight: 700; margin: 18px 0; }
+  .cl-done-banner.show { display: block; }
+</style>
+</head>
+<body class="lp">
+  <canvas id="bg-canvas"></canvas>
+  <nav>
+    <a class="brand" href="/"><span class="bolt">⚡</span> Everything You Need</a>
+    <div class="nav-links">
+      <a href="/free-llm-apis.html">Free LLM APIs</a>
+      <a href="/library.html">Library</a>
+      <a href="/links.html">Links</a>
+      <a href="/checklist.html" class="active">Checklist</a>
+      <span id="nav-auth"></span>
+    </div>
+  </nav>
+
+  <header class="lp-hero">
+    <a class="back" href="/">← Home</a>
+    <div><span class="eyebrow-pill">🚀 Ship with confidence</span></div>
+    <h1>SaaS <span class="g">Pre-Launch</span> Checklist</h1>
+    <p>Everything worth verifying before you flip the switch. Tick items off — your progress is saved automatically in this browser.</p>
+  </header>
+
+  <main class="cl-wrap">
+    <div class="cl-progress">
+      <div class="row">
+        <span class="label">Progress</span>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <span class="count" id="cl-count">0 / 0</span>
+          <button class="cl-reset" id="cl-reset" type="button">Reset</button>
+        </div>
+      </div>
+      <div class="cl-bar"><span id="cl-fill"></span></div>
+    </div>
+
+    <div class="cl-done-banner" id="cl-done">🎉 All done — you're ready to launch!</div>
+
+    <div id="cl-groups"></div>
+  </main>
+
+  <footer class="site">
+    <div class="inner">
+      <div class="col">
+        <a class="brand" href="/"><span class="bolt">⚡</span> Everything You Need</a>
+        <p style="color:var(--muted);font-size:14px;margin-top:12px;max-width:240px;">AI tools & resources that work while you sleep.</p>
+      </div>
+      <div class="col"><h4>Explore</h4><a href="/library.html">Library</a><a href="/free-llm-apis.html">Free LLM APIs</a><a href="/links.html">Links</a><a href="/checklist.html">Checklist</a></div>
+      <div class="col"><h4>Links</h4><a href="/websites.html">Websites</a><a href="/github.html">GitHub</a><a href="/docs.html">Docs</a><a href="/notion.html">Notion</a><a href="/discord.html">Discord</a></div>
+      <div class="col"><h4>Legal</h4><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/contact.html">Contact</a></div>
+    </div>
+    <div class="bottom">© 2026 AI Tools. All rights reserved.</div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+  <script>
+  (function () {
+    var GROUPS = [
+      { icon: "✅", title: "Legal & Compliance", items: [
+        { t: "Privacy Policy page" },
+        { t: "Terms & Conditions (Terms of Service)" },
+        { t: "Cookie consent (especially if targeting EU — GDPR)" },
+        { t: "Refund / cancellation policy" },
+        { t: "GDPR data export & deletion request handling" },
+        { t: "Business / imprint details (company name, address)" },
+        { t: "Age / eligibility requirement stated (if applicable)" }
+      ]},
+      { icon: "🔐", title: "Auth & Security", items: [
+        { t: "Signup / login flow tested" },
+        { t: "Email verification working" },
+        { t: "Password reset flow" },
+        { t: "OAuth (Google, etc.) working if included" },
+        { t: "Rate limiting (prevent brute force)" },
+        { t: "HTTPS / SSL enforced everywhere" },
+        { t: "Security headers (CSP, HSTS, X-Frame-Options)" },
+        { t: "Input validation & sanitization (XSS / SQL injection)" },
+        { t: "Secrets & API keys NOT committed to the repo" },
+        { t: "Dependency vulnerability audit (npm/pip audit)" },
+        { t: "Session expiry & secure logout" },
+        { t: "Two-factor authentication (optional)" }
+      ]},
+      { icon: "💳", title: "Payment & Billing", items: [
+        { t: "Payment flow fully tested (success + failure cases)" },
+        { t: "Subscription lifecycle — Upgrade" },
+        { t: "Subscription lifecycle — Downgrade" },
+        { t: "Subscription lifecycle — Cancel" },
+        { t: "Pricing page is clear and live" },
+        { t: "Invoices / receipts sent to customers" },
+        { t: "Tax / VAT / GST handling" },
+        { t: "Failed-payment handling & retries (dunning)" },
+        { t: "Free trial / proration logic verified" },
+        { t: "Payment webhooks handled & idempotent" }
+      ]},
+      { icon: "📊", title: "Analytics & Tracking", items: [
+        { t: "User event tracking" },
+        { t: "Page tracking" },
+        { t: "Conversion funnel defined" },
+        { t: "Key metrics / KPI dashboard" },
+        { t: "UTM / campaign tracking" },
+        { t: "Error & crash tracking (e.g. Sentry)" }
+      ]},
+      { icon: "📣", title: "Marketing & SEO", items: [
+        { t: "Submit page to Google Search Console" },
+        { t: "Submit on other search engines (Bing, etc.)" },
+        { t: "Meta titles & descriptions on every page" },
+        { t: "Open Graph / Twitter social share image" },
+        { t: "Favicon & app icons" },
+        { t: "sitemap.xml present" },
+        { t: "robots.txt present" },
+        { t: "Structured data / schema markup" },
+        { t: "Landing page live & conversion-focused" },
+        { t: "Social media accounts created" }
+      ]},
+      { icon: "💬", title: "Feedback & Support", items: [
+        { t: "Contact / support email" },
+        { t: "Bug report option" },
+        { t: "FAQ / help docs" },
+        { t: "Onboarding flow for new users" },
+        { t: "Changelog / what's new" },
+        { t: "Public status page" }
+      ]},
+      { icon: "⚡", title: "Performance & Reliability", items: [
+        { t: "Uptime monitoring & alerts" },
+        { t: "Database backups (automated & tested restore)" },
+        { t: "Health-check endpoint" },
+        { t: "Load / stress test under expected traffic" },
+        { t: "CDN & caching configured" },
+        { t: "Custom 404 & 500 error pages" },
+        { t: "Lighthouse / page-speed check passed" },
+        { t: "Rollback plan if a deploy breaks" }
+      ]},
+      { icon: "🧪", title: "Quality & UX", items: [
+        { t: "Mobile responsive on real devices" },
+        { t: "Cross-browser tested (Chrome, Safari, Firefox)" },
+        { t: "Accessibility basics (a11y, keyboard, contrast)" },
+        { t: "Loading & empty states designed" },
+        { t: "Form validation & error messages" },
+        { t: "No broken links or images" },
+        { t: "Spelling & copy proofread" }
+      ]},
+      { icon: "🚀", title: "Infrastructure & Launch", items: [
+        { t: "Custom domain + SSL configured" },
+        { t: "Environment variables / secrets management" },
+        { t: "Staging environment separate from production" },
+        { t: "CI/CD deploy pipeline" },
+        { t: "Database migrations run cleanly" },
+        { t: "Centralized logging" },
+        { t: "Transactional emails deliver (SPF/DKIM/DMARC)" },
+        { t: "Launch announcement ready (Product Hunt, email, social)" }
+      ]},
+      { icon: "🧑‍🔬", title: "Tester / QA perspective", items: [
+        { t: "Unit, integration & end-to-end (E2E) tests pass" },
+        { t: "Happy-path smoke test on production" },
+        { t: "Negative & edge cases (empty, huge, special chars, emoji)" },
+        { t: "Boundary values tested (0, max, off-by-one)" },
+        { t: "Concurrent users / race conditions checked" },
+        { t: "Regression pass after the final changes" },
+        { t: "Cross-browser & device matrix covered" },
+        { t: "Offline / slow-network / timeout behavior" },
+        { t: "Double-submit & back-button behavior" },
+        { t: "Bug triage & severity process in place" }
+      ]},
+      { icon: "🛡️", title: "Security Engineer perspective", items: [
+        { t: "OWASP Top 10 reviewed (injection, XSS, SSRF, etc.)" },
+        { t: "AuthZ checks — IDOR & privilege escalation tested" },
+        { t: "CSRF protection on state-changing requests" },
+        { t: "CORS policy locked down (no wildcard on credentials)" },
+        { t: "Secrets scanning on the repo & history" },
+        { t: "Dependency & container vulnerability scan" },
+        { t: "PII encrypted at rest & in transit; least-privilege access" },
+        { t: "Audit logs for sensitive actions" },
+        { t: "security.txt / vulnerability disclosure policy" },
+        { t: "Incident response & breach-notification plan" },
+        { t: "Penetration test / threat model done" }
+      ]},
+      { icon: "👨‍💻", title: "Software Engineer perspective", items: [
+        { t: "Code review on all changes; branch protection on main" },
+        { t: "CI green — tests, lint, type-check, build" },
+        { t: "Error handling & graceful degradation everywhere" },
+        { t: "Structured logging, metrics & tracing (observability)" },
+        { t: "DB indexes & slow-query review; migrations reversible" },
+        { t: "Dependencies pinned; no unused / abandoned packages" },
+        { t: "Config via env, not hardcoded; 12-factor separation" },
+        { t: "Feature flags / kill-switch for risky features" },
+        { t: "README & API docs up to date" },
+        { t: "Known tech-debt & TODOs logged, not lost" }
+      ]},
+      { icon: "🌈", title: "Vibe Coder perspective", items: [
+        { t: "AI-generated code actually runs — not just looks right" },
+        { t: "No placeholder / dummy / lorem-ipsum content left" },
+        { t: "No hardcoded API keys from AI snippets in the code" },
+        { t: "No hallucinated/non-existent APIs or imports" },
+        { t: "console.log / debug prints removed" },
+        { t: "Works deployed in production, not only on localhost" },
+        { t: "Production env vars actually set (not .env locally)" },
+        { t: "Real title, favicon & meta — not framework defaults" },
+        { t: "App survives a hard refresh & direct deep-link" },
+        { t: "One real person tried it end-to-end before launch" }
+      ]}
+    ];
+
+    var STORE_KEY = "saas-prelaunch-checklist-v1";
+    var state = {};
+    try { state = JSON.parse(localStorage.getItem(STORE_KEY) || "{}") || {}; } catch (e) { state = {}; }
+
+    var groupsEl = document.getElementById("cl-groups");
+    var countEl = document.getElementById("cl-count");
+    var fillEl = document.getElementById("cl-fill");
+    var doneEl = document.getElementById("cl-done");
+    var total = 0;
+    var boxes = [];
+
+    GROUPS.forEach(function (g, gi) {
+      var section = document.createElement("section");
+      section.className = "cl-group";
+
+      var h = document.createElement("h2");
+      h.innerHTML = '<span>' + g.icon + '</span><span>' + g.title + '</span>';
+      section.appendChild(h);
+
+      var meta = document.createElement("div");
+      meta.className = "grp-meta";
+      meta.setAttribute("data-grp", gi);
+      section.appendChild(meta);
+
+      g.items.forEach(function (it, ii) {
+        var id = "g" + gi + "i" + ii;
+        total++;
+        var label = document.createElement("label");
+        label.className = "cl-item";
+
+        var box = document.createElement("input");
+        box.type = "checkbox";
+        box.id = id;
+        box.checked = !!state[id];
+
+        var txt = document.createElement("span");
+        txt.className = "txt";
+        txt.textContent = it.t;
+
+        label.appendChild(box);
+        label.appendChild(txt);
+        section.appendChild(label);
+
+        box.addEventListener("change", function () {
+          state[id] = box.checked;
+          save();
+          render();
+        });
+        boxes.push({ box: box, gi: gi });
+      });
+
+      groupsEl.appendChild(section);
+    });
+
+    function save() {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+
+    function render() {
+      var done = boxes.filter(function (b) { return b.box.checked; }).length;
+      countEl.textContent = done + " / " + total;
+      var pct = total ? Math.round((done / total) * 100) : 0;
+      fillEl.style.width = pct + "%";
+      doneEl.classList.toggle("show", done === total && total > 0);
+
+      // Per-group counts
+      GROUPS.forEach(function (g, gi) {
+        var grpBoxes = boxes.filter(function (b) { return b.gi === gi; });
+        var gd = grpBoxes.filter(function (b) { return b.box.checked; }).length;
+        var m = groupsEl.querySelector('.grp-meta[data-grp="' + gi + '"]');
+        if (m) m.textContent = gd + " of " + grpBoxes.length + " done";
+      });
+    }
+
+    document.getElementById("cl-reset").addEventListener("click", function () {
+      state = {};
+      save();
+      boxes.forEach(function (b) { b.box.checked = false; });
+      render();
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>

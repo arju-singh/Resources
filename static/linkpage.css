@@ -1,0 +1,46 @@
+/* ===== Shared styling for Link pages (GitHub / Notion / Discord / Websites / Hub) ===== */
+#bg-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -2; display: block; }
+body.lp::before {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60% 50% at 12% 0%, rgba(6,182,212,.16), transparent 60%),
+    radial-gradient(50% 45% at 90% 8%, rgba(168,85,247,.16), transparent 60%),
+    radial-gradient(55% 50% at 50% 100%, rgba(236,72,153,.10), transparent 60%);
+}
+.lp-hero { text-align: center; padding: 84px 24px 22px; }
+.lp-hero .back { display:inline-block; color:var(--muted); text-decoration:none; font-size:13px; font-weight:700; letter-spacing:1px; margin-bottom:14px; }
+.lp-hero .back:hover { color:#67e8f9; }
+.lp-hero h1 { font-size: clamp(42px, 8vw, 92px); font-weight: 900; letter-spacing: -3px; line-height: .96; margin-top: 14px; }
+.lp-hero h1 .g {
+  background: linear-gradient(90deg,#67e8f9,#c084fc,#f0abfc,#67e8f9);
+  background-size: 300% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 6s linear infinite;
+}
+@keyframes shimmer { to { background-position: 300% center; } }
+.lp-hero p { color: var(--muted); max-width: 620px; margin: 20px auto 0; font-size: 18px; line-height: 1.6; }
+
+.lp-grid { max-width: 1200px; margin: 40px auto 0; padding: 0 28px 56px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 26px; }
+
+.lcard { opacity: 0; transform: translateY(34px); perspective: 1100px; text-decoration: none; will-change: transform, opacity; }
+.ltilt { position: relative; border-radius: 22px; overflow: hidden; transform-style: preserve-3d; height: 100%;
+  background: rgba(18,18,22,.74); border: 1px solid var(--border); backdrop-filter: blur(8px);
+  transition: transform .12s ease-out, border-color .25s, box-shadow .25s; padding: 28px; min-height: 240px; display:flex; flex-direction:column; }
+.lcard:hover .ltilt { border-color: rgba(34,211,238,.55); box-shadow: 0 26px 70px -22px rgba(34,211,238,.45); }
+.ltilt .glare { position:absolute; inset:0; opacity:0; transition:opacity .2s; pointer-events:none; mix-blend-mode:overlay;
+  background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,.22), transparent 45%); }
+.lcard:hover .glare { opacity:1; }
+.lbadge { width:64px; height:64px; border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:32px;
+  background: linear-gradient(135deg, var(--c1,#22d3ee), var(--c2,#a855f7)); transform: translateZ(45px); box-shadow:0 10px 26px -8px rgba(0,0,0,.6); }
+.lkind { margin-top:18px; font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:#67e8f9; }
+.lname { font-size:25px; font-weight:900; letter-spacing:-.6px; margin-top:6px; transform: translateZ(22px); }
+.ldesc { color:var(--muted); font-size:14.5px; line-height:1.6; margin-top:10px; flex:1; transform: translateZ(14px); }
+.lfoot { display:flex; align-items:center; justify-content:space-between; margin-top:18px; }
+.ldomain { color:var(--muted); font-size:13px; font-weight:600; word-break: break-all; }
+.lgo { font-size:22px; color:var(--muted); transition:.3s; flex-shrink:0; margin-left:10px; }
+.lcard:hover .lgo { transform: translateX(4px) rotate(-2deg); color:#67e8f9; }
+
+.lp-empty { max-width: 1200px; margin: 10px auto 0; padding: 50px 28px; text-align:center; color: var(--muted);
+  border: 1px dashed var(--border); border-radius: 20px; }
+
+@media (max-width: 760px){ .lp-grid { padding-left:16px; padding-right:16px; } }
+@media (prefers-reduced-motion: reduce){ .lp-hero h1 .g { animation:none; } .lcard { opacity:1; transform:none; } }

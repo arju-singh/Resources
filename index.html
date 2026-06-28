@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Everything You Need — by Arju Singh</title>
+<meta name="description" content="A free vault of AI, coding & career resources, free LLM API keys, and curated tools — built by Arju Singh, Software & Generative-AI Engineer.">
+<link rel="stylesheet" href="/static/styles.css">
+<style>
+  #bg-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -2; display: block; }
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(60% 50% at 12% 0%, rgba(168,85,247,.16), transparent 60%),
+      radial-gradient(50% 45% at 90% 6%, rgba(6,182,212,.15), transparent 60%),
+      radial-gradient(55% 50% at 50% 100%, rgba(236,72,153,.10), transparent 60%);
+  }
+  .h-hero { text-align: center; padding: 84px 24px 26px; }
+  .h-hero h1 { font-size: clamp(44px, 8.5vw, 104px); font-weight: 900; letter-spacing: -3px; line-height: .94; margin-top: 18px; }
+  .h-hero h1 .g {
+    background: linear-gradient(90deg,#c084fc,#f0abfc,#fca5a5,#67e8f9,#c084fc);
+    background-size: 300% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 6s linear infinite;
+  }
+  @keyframes shimmer { to { background-position: 300% center; } }
+  .h-hero p { color: var(--muted); max-width: 640px; margin: 22px auto 0; font-size: 18px; line-height: 1.6; }
+  .h-hero p b { color: var(--text); }
+  .h-cta { display:flex; gap:14px; justify-content:center; margin-top:32px; flex-wrap:wrap; }
+  .h-stats { display:flex; gap:46px; justify-content:center; margin:40px auto 0; flex-wrap:wrap; }
+  .h-stat .num { font-size:40px; font-weight:900; letter-spacing:-1px; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; text-align:center; }
+  .h-stat .lbl { color:var(--muted); font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; margin-top:4px; text-align:center; }
+
+  .h-sec { max-width: 1160px; margin: 60px auto 0; padding: 0 28px; }
+  .h-sec .eyebrow-pill { display:block; width:fit-content; margin:0 auto 14px; }
+  .h-sec h2 { text-align:center; font-size:clamp(28px,4vw,42px); font-weight:900; letter-spacing:-1px; }
+  .h-sec .lead { text-align:center; color:var(--muted); max-width:640px; margin:12px auto 0; font-size:17px; line-height:1.6; }
+
+  .inside { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:22px; margin-top:40px; }
+  .icard { position:relative; display:block; text-decoration:none; color:var(--text); border:1px solid var(--border); border-radius:20px;
+    background:rgba(20,20,23,.7); backdrop-filter:blur(8px); padding:28px; transition:transform .18s, border-color .25s, box-shadow .25s; overflow:hidden; }
+  .icard:hover { transform:translateY(-4px); border-color:#6d28d9; box-shadow:0 24px 60px -24px rgba(168,85,247,.5); }
+  .icard .ic { font-size:34px; }
+  .icard h3 { font-size:22px; font-weight:800; margin-top:14px; letter-spacing:-.4px; }
+  .icard p { color:var(--muted); font-size:14.5px; line-height:1.6; margin-top:8px; }
+  .icard .cnt { margin-top:14px; font-size:13px; font-weight:800; color:#c084fc; letter-spacing:.5px; }
+  .icard .go { position:absolute; top:24px; right:24px; color:var(--muted); font-size:20px; transition:.25s; }
+  .icard:hover .go { color:#c084fc; transform:translateX(3px); }
+
+  /* About */
+  .about { display:grid; grid-template-columns: 1fr; gap:26px; margin-top:40px; }
+  .about-card { border:1px solid var(--border); border-radius:22px; background:rgba(20,20,23,.72); backdrop-filter:blur(8px); padding:32px; }
+  .who { display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
+  .who .avatar { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,#a855f7,#22d3ee); display:flex; align-items:center; justify-content:center; font-size:30px; font-weight:900; color:#0a0a0b; flex-shrink:0; }
+  .who h3 { font-size:26px; font-weight:900; letter-spacing:-.6px; }
+  .who .role { color:#67e8f9; font-weight:700; font-size:14px; letter-spacing:.5px; }
+  .about-card .bio { color:var(--muted); font-size:15.5px; line-height:1.75; margin-top:20px; }
+  .about-card .bio b { color:var(--text); }
+  .chips { display:flex; gap:8px; flex-wrap:wrap; margin-top:20px; }
+  .chips span { font-size:12px; font-weight:700; color:#d6bcff; background:rgba(192,132,252,.12); border:1px solid rgba(192,132,252,.28); padding:5px 11px; border-radius:8px; }
+  .links-row { display:flex; gap:12px; flex-wrap:wrap; margin-top:22px; }
+  .lk { display:inline-flex; align-items:center; gap:8px; text-decoration:none; color:var(--text); border:1px solid var(--border); background:var(--bg); padding:10px 16px; border-radius:10px; font-weight:600; font-size:14px; transition:.2s; }
+  .lk:hover { border-color:#a855f7; color:#fff; }
+
+  .projects { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:18px; margin-top:24px; }
+  .proj { border:1px solid var(--border); border-radius:16px; background:rgba(20,20,23,.6); padding:20px; transition:transform .15s, border-color .2s; }
+  .proj:hover { transform:translateY(-3px); border-color:#3f3f46; }
+  .proj h4 { font-size:17px; font-weight:800; }
+  .proj .t { color:#67e8f9; font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; margin-top:2px; }
+  .proj p { color:var(--muted); font-size:13.5px; line-height:1.55; margin-top:8px; }
+
+  @media (prefers-reduced-motion: reduce){ .h-hero h1 .g { animation:none; } }
+</style>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+
+  <nav>
+    <a class="brand" href="/"><span class="bolt">⚡</span> Everything You Need</a>
+    <div class="nav-links">
+      <a href="/free-llm-apis.html">Free LLM APIs</a>
+      <a href="/library.html">Library</a>
+      <a href="/links.html">Links</a>
+      <a href="/checklist.html">Checklist</a>
+      <a href="/userpain.html">User Pain</a>
+      <span id="nav-auth"></span>
+    </div>
+  </nav>
+
+  <header class="h-hero">
+    <span class="eyebrow-pill">⚡ Built by Arju Singh · Free for everyone</span>
+    <h1>Everything <span class="g">You Need</span></h1>
+    <p>One vault for the AI, coding &amp; career resources, free LLM API keys, and hand-picked tools I actually use. <b>Sign in once — take whatever helps.</b></p>
+    <div class="h-cta">
+      <a class="btn-grad" href="/library.html">Browse the Library</a>
+      <a class="btn-ghost" href="/links.html">Explore the Links</a>
+    </div>
+    <div class="h-stats">
+      <div class="h-stat"><div class="num" data-count="150" id="s-files">0</div><div class="lbl">Resources</div></div>
+      <div class="h-stat"><div class="num" data-count="60" id="s-links">0</div><div class="lbl">Curated Links</div></div>
+      <div class="h-stat"><div class="num">234+</div><div class="lbl">Free AI Models</div></div>
+    </div>
+  </header>
+
+  <!-- What's inside -->
+  <section class="h-sec">
+    <span class="eyebrow-pill">What's inside</span>
+    <h2>Three things, all free</h2>
+    <p class="lead">Everything here is curated and kept up to date — pick whatever moves your work forward.</p>
+    <div class="inside">
+      <a class="icard" href="/library.html">
+        <span class="go">↗</span><div class="ic">📚</div>
+        <h3>The Library</h3>
+        <p>A vault of guides, prompt packs, roadmaps, cheat sheets and templates across AI, Claude, coding, design &amp; careers — sign in to download.</p>
+        <div class="cnt">150+ resources · 12 categories</div>
+      </a>
+      <a class="icard" href="/free-llm-apis.html">
+        <span class="go">↗</span><div class="ic">🔑</div>
+        <h3>Free LLM API Keys</h3>
+        <p>Direct links to working API keys for 234+ free models across 25 providers — Gemini, GPT, Claude, Llama, DeepSeek &amp; more. No credit card.</p>
+        <div class="cnt">234+ models · 25 providers</div>
+      </a>
+      <a class="icard" href="/links.html">
+        <span class="go">↗</span><div class="ic">🔗</div>
+        <h3>Links</h3>
+        <p>Hand-picked websites, GitHub repos, Google Docs, Notion pages &amp; communities — separated by type so you find things fast.</p>
+        <div class="cnt">60+ links · 5 categories</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- About Arju -->
+  <section class="h-sec" id="about">
+    <span class="eyebrow-pill">Who built this</span>
+    <h2>About Arju Singh</h2>
+    <div class="about">
+      <div class="about-card">
+        <div class="who">
+          <div class="avatar">AS</div>
+          <div>
+            <h3>Arju Singh</h3>
+            <div class="role">Software Engineer · Generative-AI Engineer</div>
+          </div>
+        </div>
+        <p class="bio">
+          I'm a software engineer who builds and ships <b>end-to-end products</b> — across the MERN stack, Flutter and TypeScript —
+          and wires LLMs (Claude, Gemini, OpenAI), the <b>Model Context Protocol</b>, and CI-driven delivery into real product workflows.
+          I've shipped across rental discovery, legal tech, pet care, food-health, security tooling and AI agents. Founder &amp; CEO of
+          <b>PetsCare.Club</b> (100+ active users), taught 60+ developers as a software instructor, and interned with the
+          <b>Government of India (MoHUA)</b> on smart-city dashboards. B.Tech in Information Technology, GJUS&amp;T Hisar.
+          This site is where I keep everything useful I've collected — and give it away free.
+        </p>
+        <div class="chips">
+          <span>React / Next.js</span><span>Node / Express</span><span>Flutter</span><span>TypeScript</span><span>Python</span>
+          <span>LLM APIs</span><span>MCP</span><span>Prompt Engineering</span><span>Firebase / Supabase</span><span>OWASP / Security</span>
+          <span>three.js</span><span>Docker · CI/CD</span>
+        </div>
+        <div class="links-row">
+          <a class="lk" href="https://arjusingh.com" target="_blank" rel="noopener">🌐 arjusingh.com</a>
+          <a class="lk" href="https://github.com/arju-singh" target="_blank" rel="noopener">🐙 GitHub</a>
+          <a class="lk" href="https://linkedin.com/in/arjusinghdev" target="_blank" rel="noopener">💼 LinkedIn</a>
+          <a class="lk" href="mailto:connect@arjusingh.com">✉️ Email</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="projects">
+      <div class="proj"><h4>SentryScan</h4><div class="t">Security</div><p>Full-stack web security auditor — OWASP Top 10, TLS/headers, headless-Chromium rendering, secret &amp; dependency scanning. Node/Express + Playwright, CI-wired.</p></div>
+      <div class="proj"><h4>Jarvis</h4><div class="t">AI Agent</div><p>Voice assistant that runs online or fully offline — Whisper + Claude/ElevenLabs online, Ollama (Qwen) + Piper offline, with MCP tools &amp; long-term memory.</p></div>
+      <div class="proj"><h4>FoodFat</h4><div class="t">Flutter App</div><p>Scans packaged-food barcodes/labels and returns a 0–100 health score, NOVA level &amp; additive risk. Open Food Facts + Claude Vision fallback.</p></div>
+      <div class="proj"><h4>MarketStack</h4><div class="t">AI Marketing</div><p>Ingests a GitHub repo + domain and runs 41+ marketing skills (CRO, SEO, ads, 90-day GTM) grounded in the real product, generated by Claude.</p></div>
+      <div class="proj"><h4>Brandio</h4><div class="t">Social Toolkit</div><p>Self-hosted social-media suite — AI backgrounds, template post/caption generation, and scheduled publishing to Meta, X &amp; LinkedIn. Dockerized microservices.</p></div>
+      <div class="proj"><h4>PetsCare.Club</h4><div class="t">Founder</div><p>Live pet-care marketplace connecting owners with vets &amp; groomers — booking, community, provider dashboards. Scaled to 100+ users.</p></div>
+    </div>
+  </section>
+
+  <section class="h-sec faq" style="max-width:800px;">
+    <span class="eyebrow-pill">FAQ</span>
+    <h2 style="margin-bottom:20px;">Frequently asked questions</h2>
+    <details><summary>Do I need to sign in?</summary><div class="ans">Only to download from the Library. Browsing the Library, Free LLM APIs and Links is open — sign-up is free and takes seconds.</div></details>
+    <details><summary>Is everything really free?</summary><div class="ans">Yes. Every resource, API link and tool here is free. No credit card, no subscription.</div></details>
+    <details><summary>Who is this for?</summary><div class="ans">Anyone building with AI or breaking into tech — developers, founders, job-seekers and creators.</div></details>
+    <details><summary>Can I reach Arju?</summary><div class="ans">Yes — via <a href="https://arjusingh.com" target="_blank" rel="noopener" style="color:#c084fc;">arjusingh.com</a>, LinkedIn, GitHub, or email.</div></details>
+  </section>
+
+  <footer class="site">
+    <div class="inner">
+      <div class="col">
+        <a class="brand" href="/"><span class="bolt">⚡</span> Everything You Need</a>
+        <p style="color:var(--muted);font-size:14px;margin-top:12px;max-width:240px;">Free AI, coding & career resources — built by Arju Singh.</p>
+      </div>
+      <div class="col"><h4>Explore</h4><a href="/library.html">Library</a><a href="/free-llm-apis.html">Free LLM APIs</a><a href="/links.html">Links</a></div>
+      <div class="col"><h4>Arju Singh</h4><a href="https://arjusingh.com" target="_blank" rel="noopener">Website</a><a href="https://github.com/arju-singh" target="_blank" rel="noopener">GitHub</a><a href="https://linkedin.com/in/arjusinghdev" target="_blank" rel="noopener">LinkedIn</a></div>
+      <div class="col"><h4>Legal</h4><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></div>
+    </div>
+    <div class="bottom">© 2026 Everything You Need · Built by Arju Singh.</div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+  <script type="module">
+    let animate, inView;
+    try { ({ animate, inView } = await import('https://cdn.jsdelivr.net/npm/motion@11.11.13/+esm')); } catch(e){}
+    const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function countUp(el,to){ if(REDUCE||!animate){el.textContent=to;return;} animate(0,to,{duration:1.2,easing:'ease-out',onUpdate:v=>el.textContent=Math.round(v)}); }
+    countUp(document.getElementById('s-files'),150);
+    countUp(document.getElementById('s-links'),60);
+    if(!REDUCE&&animate){
+      animate('.h-hero .eyebrow-pill',{opacity:[0,1],transform:['translateY(12px)','translateY(0)']},{duration:.6});
+      animate('.h-hero h1',{opacity:[0,1],transform:['translateY(20px)','translateY(0)']},{duration:.7,delay:.08});
+      animate('.h-hero p',{opacity:[0,1],transform:['translateY(16px)','translateY(0)']},{duration:.7,delay:.16});
+      if(inView) document.querySelectorAll('.icard,.proj,.about-card').forEach((el,i)=>{
+        el.style.opacity=0; el.style.transform='translateY(26px)';
+        inView(el,()=>animate(el,{opacity:[0,1],transform:['translateY(26px)','translateY(0)']},{duration:.55,delay:(i%3)*.06,easing:[0.16,1,0.3,1]}),{amount:.15});
+      });
+    }
+
+    /* Three.js background */
+    (async function bg(){
+      if (REDUCE) return;
+      let THREE; try { THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js'); } catch(e){ return; }
+      const canvas=document.getElementById('bg-canvas');
+      const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+      renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(innerWidth,innerHeight);
+      const scene=new THREE.Scene(); const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,100); camera.position.z=16;
+      const group=new THREE.Group(); scene.add(group);
+      const COUNT=1700,pos=new Float32Array(COUNT*3),col=new Float32Array(COUNT*3);
+      const pal=[[0.75,0.52,0.99],[0.40,0.91,0.95],[0.94,0.45,0.71]];
+      for(let i=0;i<COUNT;i++){const r=6+Math.random()*14,t=Math.random()*Math.PI*2,p=Math.acos(2*Math.random()-1);
+        pos[i*3]=r*Math.sin(p)*Math.cos(t);pos[i*3+1]=r*Math.sin(p)*Math.sin(t)*0.6;pos[i*3+2]=r*Math.cos(p);
+        const c=pal[(Math.random()*pal.length)|0];col[i*3]=c[0];col[i*3+1]=c[1];col[i*3+2]=c[2];}
+      const pg=new THREE.BufferGeometry();
+      pg.setAttribute('position',new THREE.BufferAttribute(pos,3));pg.setAttribute('color',new THREE.BufferAttribute(col,3));
+      group.add(new THREE.Points(pg,new THREE.PointsMaterial({size:0.085,vertexColors:true,transparent:true,opacity:.85,depthWrite:false,blending:THREE.AdditiveBlending})));
+      const shapes=[];const geos=[new THREE.IcosahedronGeometry(2.2,0),new THREE.TorusGeometry(1.7,0.5,10,28),new THREE.OctahedronGeometry(1.6,0)];
+      const cols=[0xc084fc,0x22d3ee,0xf472b6];
+      for(let i=0;i<3;i++){const m=new THREE.Mesh(geos[i],new THREE.MeshBasicMaterial({color:cols[i],wireframe:true,transparent:true,opacity:.26}));
+        m.position.set((i-1)*8.5,(i%2?3:-3),-3-i*2);scene.add(m);shapes.push(m);}
+      let tx=0,ty=0,cx=0,cy=0;
+      addEventListener('pointermove',e=>{tx=e.clientX/innerWidth-.5;ty=e.clientY/innerHeight-.5;},{passive:true});
+      addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+      let running=true; document.addEventListener('visibilitychange',()=>{running=!document.hidden;if(running)loop();});
+      const clock=new THREE.Clock();
+      function loop(){if(!running)return;requestAnimationFrame(loop);const t=clock.getElapsedTime();
+        group.rotation.y=t*0.04;group.rotation.x=Math.sin(t*0.15)*0.12;
+        shapes.forEach((s,i)=>{s.rotation.x+=0.002+i*0.0008;s.rotation.y+=0.003;s.position.y+=Math.sin(t*0.6+i)*0.004;});
+        cx+=(tx-cx)*0.04;cy+=(ty-cy)*0.04;camera.position.x=cx*4;camera.position.y=-cy*3;camera.lookAt(0,0,0);
+        renderer.render(scene,camera);}
+      loop();
+    })();
+  </script>
+</body>
+</html>

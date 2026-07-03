@@ -3,13 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SaaS Pre-Launch Checklist — Everything You Need</title>
-<meta name="description" content="A practical checklist of everything to verify before launching your SaaS.">
+<title>Checklists & Guides — Everything You Need</title>
+<meta name="description" content="Launch-ready checklists and step-by-step guides — a SaaS pre-launch checklist and a 24-hour iOS app launch playbook.">
 <link rel="stylesheet" href="/static/styles.css">
 <link rel="stylesheet" href="/static/linkpage.css">
 <style>
-  .cl-wrap { max-width: 860px; margin: 0 auto; padding: 0 24px 60px; }
-  .cl-progress { position: sticky; top: 0; z-index: 5; background: rgba(10,10,11,.85); backdrop-filter: blur(10px); padding: 16px 0 14px; margin-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .cl-wrap { max-width: 980px; margin: 0 auto; padding: 0 24px 70px; }
+
+  /* ===== Hub cards ===== */
+  .cl-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-top: 12px; }
+  .clc { position: relative; text-align: left; cursor: pointer; border: 1px solid var(--border); border-radius: 22px;
+    background: rgba(20,20,23,.72); backdrop-filter: blur(8px); padding: 30px; overflow: hidden;
+    transition: transform .18s, border-color .25s, box-shadow .25s; display: flex; flex-direction: column; color: var(--text); }
+  .clc:hover { transform: translateY(-5px); border-color: var(--c, #c084fc); box-shadow: 0 26px 64px -26px var(--cs, rgba(192,132,252,.5)); }
+  .clc .badge { width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+    font-size: 30px; background: linear-gradient(135deg, var(--c1,#c084fc), var(--c2,#f0abfc)); box-shadow: 0 10px 26px -8px rgba(0,0,0,.6); }
+  .clc .kind { margin-top: 18px; font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--c, #c084fc); }
+  .clc h2 { font-size: 25px; font-weight: 900; letter-spacing: -.6px; margin: 6px 0 0; }
+  .clc p { color: var(--muted); font-size: 14.5px; line-height: 1.6; margin: 10px 0 0; flex: 1; }
+  .clc .foot { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; }
+  .clc .meta { font-size: 12.5px; font-weight: 700; color: var(--muted); }
+  .clc .open { font-size: 13px; font-weight: 800; color: var(--c, #c084fc); display: inline-flex; align-items: center; gap: 6px; }
+  .clc .open .arr { transition: transform .25s; }
+  .clc:hover .open .arr { transform: translateX(4px); }
+  .clc .mini-bar { height: 6px; border-radius: 100px; background: var(--panel2); overflow: hidden; margin-top: 16px; display: none; }
+  .clc .mini-bar.on { display: block; }
+  .clc .mini-bar > span { display: block; height: 100%; width: 0; background: var(--grad); border-radius: 100px; transition: width .35s ease; }
+
+  /* ===== Detail views ===== */
+  .cl-view { display: none; animation: clfade .3s ease; }
+  .cl-view.show { display: block; }
+  @keyframes clfade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .cl-back { background: var(--panel); border: 1px solid var(--border); color: var(--muted); padding: 9px 16px; border-radius: 100px;
+    font-size: 13px; font-weight: 800; cursor: pointer; transition: color .15s, border-color .15s; margin-bottom: 22px; }
+  .cl-back:hover { color: var(--text); border-color: #c084fc; }
+  .cl-view-head { margin-bottom: 10px; }
+  .cl-view-head h2 { font-size: clamp(28px, 5vw, 42px); font-weight: 900; letter-spacing: -1.2px; line-height: 1.05; }
+  .cl-view-head h2 .g { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .cl-view-head p { color: var(--muted); font-size: 16px; line-height: 1.6; margin-top: 12px; max-width: 640px; }
+
+  /* ===== Checklist ===== */
+  .cl-progress { position: sticky; top: 0; z-index: 5; background: rgba(10,10,11,.85); backdrop-filter: blur(10px); padding: 16px 0 14px; margin: 18px 0 8px; border-bottom: 1px solid var(--border); }
   .cl-progress .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
   .cl-progress .label { font-size: 14px; font-weight: 700; color: var(--text); }
   .cl-progress .count { font-size: 13px; color: var(--muted); font-weight: 600; }
@@ -19,12 +53,11 @@
   .cl-reset:hover { color: var(--text); border-color: #c084fc; }
 
   .cl-group { background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 22px 24px; margin: 18px 0; }
-  .cl-group > h2 { font-size: 19px; margin: 0 0 4px; display: flex; align-items: center; gap: 10px; }
+  .cl-group > h3 { font-size: 19px; margin: 0 0 4px; display: flex; align-items: center; gap: 10px; font-weight: 800; }
   .cl-group .grp-meta { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 14px; }
 
   .cl-item { display: flex; align-items: flex-start; gap: 12px; padding: 11px 12px; border-radius: 12px; cursor: pointer; transition: background .12s; user-select: none; }
   .cl-item:hover { background: var(--panel2); }
-  .cl-item.sub { margin-left: 26px; }
   .cl-item input { appearance: none; -webkit-appearance: none; flex: 0 0 auto; width: 20px; height: 20px; margin: 1px 0 0; border: 2px solid var(--border); border-radius: 6px; background: var(--bg); cursor: pointer; position: relative; transition: border-color .15s, background .15s; }
   .cl-item input:hover { border-color: #c084fc; }
   .cl-item input:checked { background: linear-gradient(135deg,#c084fc,#f0abfc); border-color: #c084fc; }
@@ -34,6 +67,48 @@
 
   .cl-done-banner { display: none; text-align: center; background: rgba(192,132,252,.1); border: 1px solid rgba(192,132,252,.4); color: #f0abfc; border-radius: 14px; padding: 16px; font-weight: 700; margin: 18px 0; }
   .cl-done-banner.show { display: block; }
+
+  /* ===== iOS guide ===== */
+  .gd { margin-top: 22px; }
+  .gd-intro { background: rgba(34,211,238,.07); border: 1px solid rgba(34,211,238,.28); border-radius: 16px; padding: 20px 24px; color: var(--text); font-size: 16px; line-height: 1.65; }
+  .gd-intro b { color: #67e8f9; }
+  .gd-step { background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 24px 26px 24px 60px; margin: 18px 0; position: relative; transition: border-color .2s, opacity .2s; }
+  .gd-check { position: absolute; top: 24px; left: 22px; cursor: pointer; }
+  .gd-check input { position: absolute; opacity: 0; width: 24px; height: 24px; margin: 0; cursor: pointer; }
+  .gd-check-box { display: block; width: 24px; height: 24px; border: 2px solid var(--border); border-radius: 7px; background: var(--bg); transition: border-color .15s, background .15s; position: relative; }
+  .gd-check:hover .gd-check-box { border-color: #67e8f9; }
+  .gd-check input:checked + .gd-check-box { background: linear-gradient(135deg,#22d3ee,#a855f7); border-color: #22d3ee; }
+  .gd-check input:checked + .gd-check-box::after { content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #0a0a0b; font-size: 15px; font-weight: 900; }
+  .gd-step.checked { border-color: rgba(34,211,238,.4); opacity: .72; }
+  .gd-step.checked h3 .num { background: linear-gradient(135deg,#22d3ee,#a855f7); }
+  .gd-step .num { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 9px; font-size: 14px; font-weight: 900; color: #0a0a0b; background: linear-gradient(135deg,#c084fc,#f0abfc); }
+  .gd-step h3 { font-size: 21px; font-weight: 800; letter-spacing: -.4px; margin: 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .gd-step .time { font-size: 12px; font-weight: 700; color: var(--muted); background: var(--panel2); border: 1px solid var(--border); padding: 3px 10px; border-radius: 100px; }
+  .gd-tool { display: inline-flex; align-items: center; gap: 8px; margin: 14px 0 4px; font-size: 13px; font-weight: 800; color: #67e8f9; background: rgba(34,211,238,.1); border: 1px solid rgba(34,211,238,.3); padding: 5px 12px; border-radius: 100px; }
+  .gd-step > p { color: var(--text); font-size: 15px; line-height: 1.65; margin: 14px 0 0; }
+  .gd-step ul { margin: 12px 0 0; padding: 0; list-style: none; }
+  .gd-step ul li { position: relative; padding: 7px 0 7px 26px; color: var(--muted); font-size: 15px; line-height: 1.55; }
+  .gd-step ul li::before { content: '→'; position: absolute; left: 0; top: 7px; color: #c084fc; font-weight: 900; }
+  .gd-step ul li b { color: var(--text); }
+  .gd-sub { font-size: 13.5px; font-weight: 800; color: #f0abfc; margin: 18px 0 2px; letter-spacing: .2px; }
+  .gd-tip { background: rgba(192,132,252,.08); border-left: 3px solid #c084fc; border-radius: 0 10px 10px 0; padding: 12px 16px; margin-top: 14px; color: var(--text); font-size: 14.5px; line-height: 1.6; }
+
+  /* Timeline */
+  .gd-block { background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 24px 26px; margin: 18px 0; }
+  .gd-block > h3 { font-size: 21px; font-weight: 800; margin: 0 0 16px; display: flex; align-items: center; gap: 10px; }
+  .gd-timeline { display: grid; gap: 10px; }
+  .gd-tl-row { display: flex; align-items: center; gap: 16px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); }
+  .gd-tl-row .hrs { flex: 0 0 96px; font-size: 13px; font-weight: 900; color: #67e8f9; letter-spacing: .5px; }
+  .gd-tl-row .what { font-size: 15px; color: var(--text); font-weight: 600; }
+  .gd-mind { display: grid; gap: 14px; }
+  .gd-mind .swap { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .gd-mind .was { color: var(--muted); text-decoration: line-through; text-decoration-color: rgba(161,161,170,.5); font-size: 15px; }
+  .gd-mind .now { color: #f0abfc; font-weight: 800; font-size: 16px; }
+  .gd-mind .ar { color: #c084fc; font-weight: 900; }
+  .gd-tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .gd-tips .tip { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; font-size: 14.5px; font-weight: 600; color: var(--text); }
+  .gd-tips .tip span { color: #c084fc; font-weight: 900; margin-right: 8px; }
+  .gd-final { text-align: center; background: rgba(192,132,252,.1); border: 1px solid rgba(192,132,252,.4); color: #f0abfc; border-radius: 14px; padding: 18px; font-weight: 800; font-size: 17px; margin: 20px 0 0; }
 </style>
 </head>
 <body class="lp">
@@ -52,25 +127,234 @@
   <header class="lp-hero">
     <a class="back" href="/">← Home</a>
     <div><span class="eyebrow-pill">🚀 Ship with confidence</span></div>
-    <h1>SaaS <span class="g">Pre-Launch</span> Checklist</h1>
-    <p>Everything worth verifying before you flip the switch. Tick items off — your progress is saved automatically in this browser.</p>
+    <h1>Checklists <span class="g">& Guides</span></h1>
+    <p>Launch-ready playbooks for your next build. Open a card to dive in — pre-launch checks save automatically in this browser.</p>
   </header>
 
   <main class="cl-wrap">
-    <div class="cl-progress">
-      <div class="row">
-        <span class="label">Progress</span>
-        <div style="display:flex;align-items:center;gap:14px;">
-          <span class="count" id="cl-count">0 / 0</span>
-          <button class="cl-reset" id="cl-reset" type="button">Reset</button>
-        </div>
+    <!-- ===== Hub / cards ===== -->
+    <div id="cl-hub">
+      <div class="cl-cards">
+        <button class="clc" data-open="saas" type="button" style="--c:#c084fc;--cs:rgba(192,132,252,.5);--c1:#c084fc;--c2:#f0abfc;">
+          <div class="badge">✅</div>
+          <div class="kind">Interactive Checklist</div>
+          <h2>SaaS Pre-Launch Checklist</h2>
+          <p>Everything worth verifying before you flip the switch — legal, auth, billing, security, SEO, QA and 6 more lenses. Tick items off; progress is saved.</p>
+          <div class="mini-bar" id="mini-bar"><span id="mini-fill"></span></div>
+          <div class="foot">
+            <span class="meta" id="saas-meta">120 items · 13 sections</span>
+            <span class="open">Open checklist <span class="arr">→</span></span>
+          </div>
+        </button>
+
+        <button class="clc" data-open="ios" type="button" style="--c:#67e8f9;--cs:rgba(34,211,238,.5);--c1:#22d3ee;--c2:#a855f7;">
+          <div class="badge">📱</div>
+          <div class="kind">Step-by-step Guide</div>
+          <h2>Launch Your iOS App in 24 Hours</h2>
+          <p>The exact workflow to go from idea → live App Store app in one day — FigJam to Figma to AI-built SwiftUI, backend, testing and publish.</p>
+          <div class="mini-bar" id="ios-mini-bar"><span id="ios-mini-fill"></span></div>
+          <div class="foot">
+            <span class="meta" id="ios-card-meta">6 steps · ~24 hours</span>
+            <span class="open">Open guide <span class="arr">→</span></span>
+          </div>
+        </button>
       </div>
-      <div class="cl-bar"><span id="cl-fill"></span></div>
     </div>
 
-    <div class="cl-done-banner" id="cl-done">🎉 All done — you're ready to launch!</div>
+    <!-- ===== SaaS checklist view ===== -->
+    <section class="cl-view" id="view-saas">
+      <button class="cl-back" data-back type="button">← All checklists & guides</button>
+      <div class="cl-view-head">
+        <h2>SaaS <span class="g">Pre-Launch</span> Checklist</h2>
+        <p>Tick items off as you go — your progress is saved automatically in this browser.</p>
+      </div>
 
-    <div id="cl-groups"></div>
+      <div class="cl-progress">
+        <div class="row">
+          <span class="label">Progress</span>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <span class="count" id="cl-count">0 / 0</span>
+            <button class="cl-reset" id="cl-reset" type="button">Reset</button>
+          </div>
+        </div>
+        <div class="cl-bar"><span id="cl-fill"></span></div>
+      </div>
+
+      <div class="cl-done-banner" id="cl-done">🎉 All done — you're ready to launch!</div>
+
+      <div id="cl-groups"></div>
+    </section>
+
+    <!-- ===== iOS guide view ===== -->
+    <section class="cl-view" id="view-ios">
+      <button class="cl-back" data-back type="button">← All checklists & guides</button>
+      <div class="cl-view-head">
+        <h2>🚀 Launch Your iOS App in <span class="g">24 Hours</span></h2>
+        <p>This is the exact workflow I use to go from idea → live App Store app in one day. Tick each step as you finish — progress saves in this browser.</p>
+      </div>
+
+      <div class="cl-progress">
+        <div class="row">
+          <span class="label">Your progress</span>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <span class="count" id="ios-count">0 / 6</span>
+            <button class="cl-reset" id="ios-reset" type="button">Reset</button>
+          </div>
+        </div>
+        <div class="cl-bar"><span id="ios-fill"></span></div>
+      </div>
+
+      <div class="cl-done-banner" id="ios-done">🎉 All 6 steps done — your app is live. Ship it!</div>
+
+      <div class="gd">
+        <div class="gd-intro">Before you touch design or code, get the logic right. Then let AI handle implementation while <b>you focus on logic, UX and decisions.</b></div>
+
+        <!-- Step 1 -->
+        <div class="gd-step" data-step="1">
+          <label class="gd-check"><input type="checkbox" data-ios="s1"><span class="gd-check-box"></span></label>
+          <h3><span class="num">1</span> Define the User Flow <span class="time">30–60 min</span></h3>
+          <div class="gd-tool">🧠 Tool: FigJam</div>
+          <p>Before touching design or code, map the logic. Open <b>FigJam</b> and sketch:</p>
+          <ul>
+            <li>Entry point (Onboarding / Login)</li>
+            <li>Core action (what's the main feature?)</li>
+            <li>Supporting screens (Profile, Settings, Dashboard, etc.)</li>
+            <li>Exit / Success states</li>
+          </ul>
+          <div class="gd-tip">👉 Keep it rough — boxes and arrows are enough. Understand the journey, remove unnecessary steps, keep it simple. If you can't explain your app in 5 screens or less, simplify it.</div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="gd-step" data-step="2">
+          <label class="gd-check"><input type="checkbox" data-ios="s2"><span class="gd-check-box"></span></label>
+          <h3><span class="num">2</span> Design the Screens <span class="time">2–4 hours</span></h3>
+          <div class="gd-tool">🎨 Tool: Figma</div>
+          <p>Copy your sketches into <b>Figma</b> and turn each one into a clean mobile frame.</p>
+          <div class="gd-sub">What to focus on</div>
+          <ul>
+            <li>Clear hierarchy</li>
+            <li>Strong typography</li>
+            <li>Simple color system</li>
+            <li>Consistent spacing</li>
+            <li>Realistic mock data</li>
+          </ul>
+          <div class="gd-sub">Pull references from</div>
+          <ul>
+            <li>Dribbble</li>
+            <li>Mobbin</li>
+            <li>App Store top charts</li>
+          </ul>
+          <div class="gd-tip">💡 Do NOT overdesign — the goal is clarity. When finished: double-check alignment, name your frames properly, organize layers. Clean Figma = smoother AI conversion later.</div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="gd-step" data-step="3">
+          <label class="gd-check"><input type="checkbox" data-ios="s3"><span class="gd-check-box"></span></label>
+          <h3><span class="num">3</span> Convert Design Into a Real App <span class="time">2–3 hours</span></h3>
+          <div class="gd-tool">⚙️ Tool: Superappp (AI SwiftUI builder)</div>
+          <p>Now the magic happens:</p>
+          <ul>
+            <li>Copy your Figma file link</li>
+            <li>Paste it into <b>Superappp</b></li>
+            <li>Let the AI convert your UI into <b>real SwiftUI components</b></li>
+          </ul>
+          <p>You'll instantly get proper layout structure, navigation, wired buttons and basic states — saving days of manual development.</p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="gd-step" data-step="4">
+          <label class="gd-check"><input type="checkbox" data-ios="s4"><span class="gd-check-box"></span></label>
+          <h3><span class="num">4</span> Add Backend & Integrations <span class="time">2–4 hours</span></h3>
+          <p>Turn your design into a real product. Inside Superappp, chat with the AI and request:</p>
+          <div class="gd-sub">🔐 Authentication</div>
+          <ul>
+            <li>"Add email/password login"</li>
+            <li>"Add Apple Sign In"</li>
+            <li>"Create onboarding flow"</li>
+          </ul>
+          <div class="gd-sub">🗄 Database</div>
+          <ul>
+            <li>"Connect a database"</li>
+            <li>"Create a user table"</li>
+            <li>"Store user-generated content"</li>
+          </ul>
+          <div class="gd-sub">☁ Backend logic</div>
+          <ul>
+            <li>API connections</li>
+            <li>Data fetching</li>
+            <li>Save user progress</li>
+            <li>Push notifications (optional)</li>
+          </ul>
+          <div class="gd-tip">You don't need to write backend code manually — just describe what you want clearly.</div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="gd-step" data-step="5">
+          <label class="gd-check"><input type="checkbox" data-ios="s5"><span class="gd-check-box"></span></label>
+          <h3><span class="num">5</span> Test & Iterate <span class="time">2–3 hours</span></h3>
+          <p>Before publishing, test the onboarding, login/logout and edge cases — then try to break it.</p>
+          <p>If something feels off, just tell the AI:</p>
+          <ul>
+            <li>"The login doesn't redirect properly"</li>
+            <li>"Add loading state"</li>
+            <li>"Improve error message"</li>
+          </ul>
+          <div class="gd-tip">Iterate fast. This is where speed beats perfection.</div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="gd-step" data-step="6">
+          <label class="gd-check"><input type="checkbox" data-ios="s6"><span class="gd-check-box"></span></label>
+          <h3><span class="num">6</span> Publish to the App Store</h3>
+          <p>Once stable:</p>
+          <ul>
+            <li>Inside Superappp, click <b>"Publish"</b></li>
+            <li>Follow the App Store submission steps</li>
+            <li>Generate screenshots</li>
+            <li>Write your app description</li>
+            <li>Submit for review</li>
+          </ul>
+          <div class="gd-tip">Superappp guides you through the process. Approval usually takes 24–48 hours.</div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="gd-block">
+          <h3>⏱ Realistic 24-Hour Timeline</h3>
+          <div class="gd-timeline">
+            <div class="gd-tl-row"><span class="hrs">Hour 1</span><span class="what">User flow</span></div>
+            <div class="gd-tl-row"><span class="hrs">Hours 2–5</span><span class="what">Design</span></div>
+            <div class="gd-tl-row"><span class="hrs">Hours 6–9</span><span class="what">AI conversion</span></div>
+            <div class="gd-tl-row"><span class="hrs">Hours 10–16</span><span class="what">Backend & integrations</span></div>
+            <div class="gd-tl-row"><span class="hrs">Hours 17–20</span><span class="what">Testing</span></div>
+            <div class="gd-tl-row"><span class="hrs">Hours 21–24</span><span class="what">Publish & polish</span></div>
+          </div>
+        </div>
+
+        <!-- Mindset -->
+        <div class="gd-block">
+          <h3>🧠 Key Mindset Shift</h3>
+          <div class="gd-mind">
+            <div class="swap"><span class="ar">→</span><span class="was">Designer waiting for dev</span></div>
+            <div class="swap"><span class="ar">→</span><span class="was">Founder stuck in no-code</span></div>
+            <div class="swap"><span class="now">You are: Product architect · AI director · Execution machine</span></div>
+          </div>
+          <p style="color:var(--muted);margin-top:14px;font-size:15px;line-height:1.6;">AI handles implementation. You focus on logic, UX and decisions.</p>
+        </div>
+
+        <!-- Pro tips -->
+        <div class="gd-block">
+          <h3>🔥 Pro Tips</h3>
+          <div class="gd-tips">
+            <div class="tip"><span>•</span>Keep v1 simple</div>
+            <div class="tip"><span>•</span>Ship fast</div>
+            <div class="tip"><span>•</span>Focus on the onboarding</div>
+            <div class="tip"><span>•</span>Improve weekly</div>
+            <div class="tip"><span>•</span>Add features later</div>
+          </div>
+          <div class="gd-final">Speed &gt; perfection.</div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="site">
@@ -241,6 +525,9 @@
     var countEl = document.getElementById("cl-count");
     var fillEl = document.getElementById("cl-fill");
     var doneEl = document.getElementById("cl-done");
+    var miniBar = document.getElementById("mini-bar");
+    var miniFill = document.getElementById("mini-fill");
+    var saasMeta = document.getElementById("saas-meta");
     var total = 0;
     var boxes = [];
 
@@ -248,7 +535,7 @@
       var section = document.createElement("section");
       section.className = "cl-group";
 
-      var h = document.createElement("h2");
+      var h = document.createElement("h3");
       h.innerHTML = '<span>' + g.icon + '</span><span>' + g.title + '</span>';
       section.appendChild(h);
 
@@ -287,6 +574,8 @@
       groupsEl.appendChild(section);
     });
 
+    saasMeta.textContent = total + " items · " + GROUPS.length + " sections";
+
     function save() {
       try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
     }
@@ -297,6 +586,16 @@
       var pct = total ? Math.round((done / total) * 100) : 0;
       fillEl.style.width = pct + "%";
       doneEl.classList.toggle("show", done === total && total > 0);
+
+      // Card mini progress
+      if (done > 0) {
+        miniBar.classList.add("on");
+        miniFill.style.width = pct + "%";
+        saasMeta.textContent = done + " / " + total + " done · " + pct + "%";
+      } else {
+        miniBar.classList.remove("on");
+        saasMeta.textContent = total + " items · " + GROUPS.length + " sections";
+      }
 
       // Per-group counts
       GROUPS.forEach(function (g, gi) {
@@ -315,6 +614,98 @@
     });
 
     render();
+
+    /* ===== iOS 24-hour guide checklist ===== */
+    (function () {
+      var IOS_KEY = "ios-launch-checklist-v1";
+      var iosState = {};
+      try { iosState = JSON.parse(localStorage.getItem(IOS_KEY) || "{}") || {}; } catch (e) { iosState = {}; }
+
+      var iosBoxes = Array.prototype.slice.call(document.querySelectorAll('input[data-ios]'));
+      var iosCount = document.getElementById("ios-count");
+      var iosFill = document.getElementById("ios-fill");
+      var iosDone = document.getElementById("ios-done");
+      var iosMiniBar = document.getElementById("ios-mini-bar");
+      var iosMiniFill = document.getElementById("ios-mini-fill");
+      var iosCardMeta = document.getElementById("ios-card-meta");
+      var iosTotal = iosBoxes.length;
+
+      function iosSave() { try { localStorage.setItem(IOS_KEY, JSON.stringify(iosState)); } catch (e) {} }
+
+      function iosRender() {
+        var done = 0;
+        iosBoxes.forEach(function (b) {
+          if (b.checked) done++;
+          var step = b.closest(".gd-step");
+          if (step) step.classList.toggle("checked", b.checked);
+        });
+        var pct = iosTotal ? Math.round((done / iosTotal) * 100) : 0;
+        iosCount.textContent = done + " / " + iosTotal;
+        iosFill.style.width = pct + "%";
+        iosDone.classList.toggle("show", done === iosTotal && iosTotal > 0);
+        if (done > 0) {
+          iosMiniBar.classList.add("on");
+          iosMiniFill.style.width = pct + "%";
+          iosCardMeta.textContent = done + " / " + iosTotal + " steps · " + pct + "%";
+        } else {
+          iosMiniBar.classList.remove("on");
+          iosCardMeta.textContent = "6 steps · ~24 hours";
+        }
+      }
+
+      iosBoxes.forEach(function (b) {
+        b.checked = !!iosState[b.getAttribute("data-ios")];
+        b.addEventListener("change", function () {
+          iosState[b.getAttribute("data-ios")] = b.checked;
+          iosSave();
+          iosRender();
+        });
+      });
+
+      document.getElementById("ios-reset").addEventListener("click", function () {
+        iosState = {};
+        iosSave();
+        iosBoxes.forEach(function (b) { b.checked = false; });
+        iosRender();
+      });
+
+      iosRender();
+    })();
+
+    /* ===== Card <-> detail navigation ===== */
+    var hub = document.getElementById("cl-hub");
+    var views = { saas: document.getElementById("view-saas"), ios: document.getElementById("view-ios") };
+
+    function show(which) {
+      var valid = which === "saas" || which === "ios";
+      hub.style.display = valid ? "none" : "";
+      Object.keys(views).forEach(function (k) {
+        views[k].classList.toggle("show", valid && k === which);
+      });
+      if (valid) window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    document.querySelectorAll(".clc").forEach(function (card) {
+      card.addEventListener("click", function () {
+        var w = card.getAttribute("data-open");
+        if (location.hash !== "#" + w) location.hash = w;
+        else show(w);
+      });
+    });
+
+    document.querySelectorAll("[data-back]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (location.hash) location.hash = "";
+        else show(null);
+      });
+    });
+
+    function route() {
+      var h = (location.hash || "").replace("#", "");
+      show(h === "saas" || h === "ios" ? h : null);
+    }
+    window.addEventListener("hashchange", route);
+    route();
   })();
   </script>
 </body>

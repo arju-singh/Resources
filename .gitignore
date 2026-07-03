@@ -25,3 +25,6 @@ library/
 
 # Server logs / scratch
 *.log
+
+# Firebase deploy cache
+.firebase/

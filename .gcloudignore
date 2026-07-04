@@ -1,0 +1,15 @@
+# What NOT to upload to Cloud Build. Keep the image lean but INCLUDE the
+# materialised library (real files) and static assets the server needs.
+.git/
+.gitignore
+.firebase/
+firebase.json
+*.log
+users.db
+node_modules/
+DEPLOY.md
+.DS_Store
+**/.DS_Store
+# rom/ is the raw source of the library files; the deploy script copies the
+# resolved files into library/, so the container doesn't need rom/ itself.
+rom/

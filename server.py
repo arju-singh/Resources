@@ -36,9 +36,11 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from http.cookies import SimpleCookie
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(ROOT, "users.db")
-FILES_DIR = os.path.join(ROOT, "files")
-LIBRARY_DIR = os.path.join(ROOT, "library")
+# DB_PATH is overridable so production can point it at a persistent volume
+# (Cloud Run's own filesystem is ephemeral — a mounted bucket keeps accounts).
+DB_PATH = os.environ.get("DB_PATH", os.path.join(ROOT, "users.db"))
+FILES_DIR = os.environ.get("FILES_DIR", os.path.join(ROOT, "files"))
+LIBRARY_DIR = os.environ.get("LIBRARY_DIR", os.path.join(ROOT, "library"))
 STATIC_DIR = os.path.join(ROOT, "static")
 
 # ---------- Configuration (all via environment — no secrets in source) ----------
@@ -54,6 +56,34 @@ MAX_BODY_BYTES = int(os.environ.get("MAX_BODY_BYTES", 64 * 1024))  # cap request
 MAX_EMAIL_LEN = 254          # RFC 5321 practical maximum
 MIN_PW_LEN, MAX_PW_LEN = 6, 128
 PBKDF2_ITERS = 120_000
+
+# ---------- Payments (Razorpay) ----------
+# Keys come ONLY from the environment — never hard-code a secret. The publishable
+# key id is safe to expose to the browser; the secret must stay server-side.
+#   export RAZORPAY_KEY_ID=rzp_test_xxx      (use TEST keys for local dev)
+#   export RAZORPAY_KEY_SECRET=xxxxxxxx
+RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "")
+RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
+CURRENCY = os.environ.get("CURRENCY", "INR")
+PAYMENTS_ON = bool(RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET)
+
+# Server-authoritative price map (filename -> rupees; 0 = free). The client copy
+# in library-data.js is for display only — order amounts and the download gate
+# always use THIS map so a tampered client can't set its own price.
+PRICING_PATH = os.path.join(ROOT, "pricing.json")
+def load_prices():
+    try:
+        with open(PRICING_PATH, encoding="utf-8") as f:
+            raw = json.load(f)
+        return {str(k): int(v) for k, v in raw.items() if isinstance(v, (int, float))}
+    except Exception:
+        return {}
+PRICES = load_prices()
+
+def price_of(fname):
+    """Rupees for a library file. Unknown files default to free (nothing else is
+    served through /libdl, so this can't accidentally expose a paid asset)."""
+    return PRICES.get(fname, 0)
 
 # ---------- Database ----------
 def db():
@@ -83,6 +113,24 @@ def init_db():
             fails TEXT NOT NULL DEFAULT '[]',   -- JSON array of recent failure epochs
             locked_until REAL NOT NULL DEFAULT 0,
             strikes INTEGER NOT NULL DEFAULT 0
+        );
+        -- A Razorpay order we created, bound to the buyer + the exact file/amount,
+        -- so verification grants only what was actually paid for (no price tampering).
+        CREATE TABLE IF NOT EXISTS orders (
+            order_id TEXT PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            file TEXT NOT NULL,
+            amount INTEGER NOT NULL,             -- rupees
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        );
+        -- A completed purchase unlocks a file for a user, forever.
+        CREATE TABLE IF NOT EXISTS purchases (
+            user_id INTEGER NOT NULL,
+            file TEXT NOT NULL,
+            payment_id TEXT,
+            amount INTEGER,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (user_id, file)
         );
         """)
         # Drop clearly-stale rows (expired lock and no recent failures) on startup.
@@ -139,6 +187,51 @@ def drop_session(token):
     if token:
         with db() as conn:
             conn.execute("DELETE FROM sessions WHERE token=?", (token,))
+
+# ---------- Purchases / payments ----------
+def has_purchased(user_id, fname):
+    with db() as conn:
+        row = conn.execute("SELECT 1 FROM purchases WHERE user_id=? AND file=?",
+                           (user_id, fname)).fetchone()
+    return row is not None
+
+def user_purchases(user_id):
+    with db() as conn:
+        rows = conn.execute("SELECT file FROM purchases WHERE user_id=?", (user_id,)).fetchall()
+    return [r["file"] for r in rows]
+
+def razorpay_create_order(user_id, fname, rupees):
+    """Create a Razorpay order server-side and remember what it's for. Returns the
+    order dict or raises. Amount is sent in the smallest unit (paise)."""
+    import base64, urllib.request
+    body = json.dumps({
+        "amount": rupees * 100,
+        "currency": CURRENCY,
+        "receipt": f"eyn-{user_id}-{secrets.token_hex(6)}",
+        "notes": {"user_id": str(user_id), "file": fname[:200]},
+    }).encode()
+    auth = base64.b64encode(f"{RAZORPAY_KEY_ID}:{RAZORPAY_KEY_SECRET}".encode()).decode()
+    req = urllib.request.Request(
+        "https://api.razorpay.com/v1/orders", data=body, method="POST",
+        headers={"Content-Type": "application/json", "Authorization": f"Basic {auth}"})
+    with urllib.request.urlopen(req, timeout=15) as r:
+        order = json.loads(r.read())
+    with db() as conn:
+        conn.execute("INSERT OR REPLACE INTO orders (order_id, user_id, file, amount) VALUES (?,?,?,?)",
+                     (order["id"], user_id, fname, rupees))
+    return order
+
+def razorpay_signature_ok(order_id, payment_id, signature):
+    """Verify the Razorpay callback signature = HMAC_SHA256(order_id|payment_id, secret)."""
+    expected = hmac.new(RAZORPAY_KEY_SECRET.encode(),
+                        f"{order_id}|{payment_id}".encode(), hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, signature or "")
+
+def record_purchase(user_id, fname, payment_id, rupees):
+    with db() as conn:
+        conn.execute(
+            "INSERT OR IGNORE INTO purchases (user_id, file, payment_id, amount) VALUES (?,?,?,?)",
+            (user_id, fname, payment_id, rupees))
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
@@ -299,11 +392,12 @@ class Handler(BaseHTTPRequestHandler):
         # modules/handlers; tighten to nonces/hashes if those are refactored.
         "Content-Security-Policy": (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://checkout.razorpay.com; "
             "style-src 'self' 'unsafe-inline'; "
-            "img-src 'self' data:; "
+            "img-src 'self' data: https://*.razorpay.com; "
             "font-src 'self'; "
-            "connect-src 'self' https://cdn.jsdelivr.net; "
+            "connect-src 'self' https://cdn.jsdelivr.net https://*.razorpay.com https://lumberjack.razorpay.com; "
+            "frame-src https://api.razorpay.com https://checkout.razorpay.com; "
             "frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
         ),
     }
@@ -439,6 +533,20 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send_json(user)
             return self.send_json({"error": "not authenticated"}, 401)
 
+        # Public payment config (publishable key id only — never the secret).
+        if path == "/api/pay-config":
+            return self.send_json({"configured": PAYMENTS_ON,
+                                   "key_id": RAZORPAY_KEY_ID if PAYMENTS_ON else "",
+                                   "currency": CURRENCY})
+
+        # Which files the signed-in user has unlocked (bought or free), so the
+        # library can show the right button. Prices come from the server, not the client.
+        if path == "/api/my-purchases":
+            user = self.current_user()
+            if not user:
+                return self.send_json({"error": "not authenticated"}, 401)
+            return self.send_json({"purchased": user_purchases(user["id"])})
+
         # Which library files currently exist (skips deleted/dangling) — lets the
         # client hide resources whose underlying file was physically removed.
         if path == "/api/library-files":
@@ -472,6 +580,15 @@ class Handler(BaseHTTPRequestHandler):
             if os.path.abspath(target) != os.path.abspath(os.path.join(base_dir, safe)) \
                or not os.path.abspath(target).startswith(os.path.abspath(base_dir) + os.sep):
                 return self.send_error(403, "Forbidden")
+            # Paywall: library files with a price require a completed purchase.
+            # Free files (price 0) download for any signed-in user. The gate is
+            # here on the server, so it can't be bypassed from the client.
+            if path.startswith("/libdl"):
+                price = price_of(safe)
+                if price > 0 and not has_purchased(user["id"], safe):
+                    return self.send_json(
+                        {"error": "Purchase required to download this resource.",
+                         "price": price, "file": safe}, 402)
             return self.serve_file(target, download_name=safe)
 
         # Static: /static/* (supports nested dirs, e.g. /static/covers/x.png)
@@ -506,7 +623,8 @@ class Handler(BaseHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
 
-        if path not in ("/api/signup", "/api/login", "/api/logout"):
+        if path not in ("/api/signup", "/api/login", "/api/logout",
+                        "/api/create-order", "/api/verify-payment"):
             return self.send_error(404, "Not found")
 
         # All POST APIs share the tighter API budget; auth routes add brute-force limits.
@@ -565,6 +683,55 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/logout":
             drop_session(self.session_token())
             return self.send_json({"ok": True}, 200, clear_cookie=True)
+
+        # --- Payments: create a Razorpay order for a specific file ---
+        if path == "/api/create-order":
+            user = self.current_user()
+            if not user:
+                return self.send_json({"error": "Sign in to purchase."}, 401)
+            if not PAYMENTS_ON:
+                return self.send_json({"error": "Payments aren’t configured yet."}, 503)
+            fname = data.get("file")
+            if not isinstance(fname, str) or not fname or len(fname) > 255 \
+               or "/" in fname or "\\" in fname or "\x00" in fname:
+                return self.send_json({"error": "Invalid file."}, 400)
+            fname = os.path.basename(fname)
+            price = price_of(fname)
+            if price <= 0:
+                return self.send_json({"error": "This resource is free — no payment needed."}, 400)
+            if has_purchased(user["id"], fname):
+                return self.send_json({"already_purchased": True})
+            try:
+                order = razorpay_create_order(user["id"], fname, price)
+            except Exception:
+                return self.send_json({"error": "Couldn’t start the payment. Please try again."}, 502)
+            return self.send_json({"order_id": order["id"], "amount": price * 100,
+                                   "currency": CURRENCY, "key_id": RAZORPAY_KEY_ID,
+                                   "file": fname})
+
+        # --- Payments: verify the signed callback, then unlock the file ---
+        if path == "/api/verify-payment":
+            user = self.current_user()
+            if not user:
+                return self.send_json({"error": "Sign in required."}, 401)
+            if not PAYMENTS_ON:
+                return self.send_json({"error": "Payments aren’t configured yet."}, 503)
+            oid = data.get("razorpay_order_id")
+            pid = data.get("razorpay_payment_id")
+            sig = data.get("razorpay_signature")
+            if not all(isinstance(x, str) and x for x in (oid, pid, sig)):
+                return self.send_json({"error": "Invalid payment response."}, 400)
+            # The order must be one WE created for THIS user — grant only that file.
+            with db() as conn:
+                row = conn.execute(
+                    "SELECT file, amount FROM orders WHERE order_id=? AND user_id=?",
+                    (oid, user["id"])).fetchone()
+            if not row:
+                return self.send_json({"error": "Unknown order."}, 400)
+            if not razorpay_signature_ok(oid, pid, sig):
+                return self.send_json({"error": "Payment verification failed."}, 400)
+            record_purchase(user["id"], row["file"], pid, row["amount"])
+            return self.send_json({"ok": True, "file": row["file"]})
 
     def log_message(self, fmt, *args):
         print("[server]", self.address_string(), fmt % args)

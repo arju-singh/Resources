@@ -137,6 +137,21 @@
     background: rgba(20,20,23,.8); border:1px solid var(--border); color:var(--text); font-size:20px; display:flex; align-items:center; justify-content:center; backdrop-filter: blur(6px); }
   .rclose:hover { border-color:#a855f7; color:#fff; }
 
+  /* ===== Pricing / purchase UI ===== */
+  .vprice { position:absolute; bottom:14px; right:14px; z-index:4; font-size:13px; font-weight:800; letter-spacing:.3px;
+    padding:5px 11px; border-radius:9px; backdrop-filter:blur(4px); box-shadow:0 6px 16px -8px rgba(0,0,0,.7); }
+  .vprice.paid { color:#0a0a0b; background:linear-gradient(90deg,#c084fc,#f0abfc); }
+  .vprice.free { color:#0a0a0b; background:linear-gradient(90deg,#4ade80,#86efac); }
+  .rdl.buy { background:linear-gradient(90deg,#c084fc,#f0abfc); color:#0a0a0b; }
+  .rdl[disabled] { opacity:.6; cursor:not-allowed; }
+  .rowned { display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:#86efac; }
+  .pay-toast { position:fixed; left:50%; bottom:26px; transform:translateX(-50%); z-index:400;
+    background:#141417; border:1px solid var(--border); color:var(--text); padding:13px 20px; border-radius:12px;
+    font-size:14px; font-weight:600; box-shadow:0 18px 50px rgba(0,0,0,.55); max-width:90vw; text-align:center;
+    animation:ccUp .3s ease both; }
+  .pay-toast.err { border-color:#fb7185; }
+  @keyframes ccUp { from{opacity:0;transform:translate(-50%,10px)} to{opacity:1;transform:translate(-50%,0)} }
+
   @media (max-width: 760px){
     .lib-controls { top: 64px; padding: 0 16px; }
     .lib-grid { padding-left: 16px; padding-right: 16px; }
@@ -164,11 +179,11 @@
   <header class="lib-hero">
     <span class="eyebrow-pill kicker">📚 The Vault · Curated &amp; Free</span>
     <h1>The <span class="g">Library</span></h1>
-    <p>A hand-curated vault of AI, Claude, coding, design &amp; career resources — guides, prompt packs, roadmaps, and cheat sheets. <b id="gate-note">Sign in to download — it's free.</b></p>
+    <p>A hand-curated vault of AI, Claude, coding, design &amp; career resources — guides, prompt packs, roadmaps, and cheat sheets. <b id="gate-note">Sign in to unlock — some picks are free, the rest from ₹29.</b></p>
     <div class="stats">
       <div class="stat"><div class="num" data-count="0" id="stat-files">0</div><div class="lbl">Resources</div></div>
       <div class="stat"><div class="num" data-count="0" id="stat-cats">0</div><div class="lbl">Categories</div></div>
-      <div class="stat"><div class="num" id="stat-free">100%</div><div class="lbl">Free Access</div></div>
+      <div class="stat"><div class="num" id="stat-free">0</div><div class="lbl">Free Picks</div></div>
     </div>
   </header>
 
@@ -207,6 +222,8 @@
 
   <script src="/static/app.js"></script>
   <script src="/static/library-data.js"></script>
+  <!-- Razorpay Checkout (only used when a paid resource is bought) -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
   <!-- Three.js animated background + Motion-driven UI -->
   <script type="module">
@@ -309,6 +326,8 @@
     const search = document.getElementById('search');
     const chipsEl = document.getElementById('chips');
     let activeCat = 'All';
+    AUTH.purchases = new Set();               // files the signed-in user has unlocked
+    let PAY = { configured: false, key_id: '', currency: 'INR' };
 
     // Reveal cards as they scroll into view (adds .in → CSS transitions them visible).
     const revealIO = ('IntersectionObserver' in window)
@@ -340,10 +359,72 @@
     let lastFocus = null;
 
     function modalActions(d){
-      if (AUTH.user) {
-        return `<a class="rdl" id="rdl" href="/libdl?file=${encodeURIComponent(d.file)}" download>⬇ Download Free</a>`;
+      const owned = d.price === 0 || AUTH.purchases.has(d.file);
+      if (!AUTH.user) {
+        const verb = d.price ? `Buy · ₹${d.price}` : 'Download';
+        return `<a class="rdl locked" href="/login.html?next=library#r-${d.i}">🔐 Sign in to ${verb}</a>`;
       }
-      return `<a class="rdl locked" href="/login.html?next=library#r-${d.i}">🔐 Sign in to Download</a>`;
+      if (owned) {
+        const label = d.price === 0 ? '⬇ Download Free' : '⬇ Download';
+        return `<a class="rdl" id="rdl" href="/libdl?file=${encodeURIComponent(d.file)}" download>${label}</a>`
+             + (d.price ? `<span class="rowned">✓ Purchased</span>` : '');
+      }
+      // Paid, not yet purchased
+      if (!PAY.configured) {
+        return `<button class="rdl" disabled title="Payments will be enabled soon">🛒 ₹${d.price} · coming soon</button>`;
+      }
+      return `<button class="rdl buy" id="rbuy">🛒 Buy &amp; Download · ₹${d.price}</button>`;
+    }
+
+    // Lightweight, non-blocking status message (no alert()).
+    function payToast(msg, err){
+      document.querySelectorAll('.pay-toast').forEach(t => t.remove());
+      const t = document.createElement('div');
+      t.className = 'pay-toast' + (err ? ' err' : '');
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 4500);
+    }
+    function triggerDownload(d){ window.location.href = `/libdl?file=${encodeURIComponent(d.file)}`; }
+
+    // Buy a paid resource: server creates the Razorpay order (authoritative price),
+    // Checkout collects payment, the server verifies the signature, then we unlock
+    // and download. The secret never touches the browser.
+    async function buyAndDownload(d){
+      if (typeof Razorpay === 'undefined') { payToast('Payment library didn’t load — check your connection.', true); return; }
+      const btn = document.getElementById('rbuy');
+      const reset = () => { if (btn) { btn.disabled = false; btn.innerHTML = `🛒 Buy &amp; Download · ₹${d.price}`; } };
+      if (btn) { btn.disabled = true; btn.textContent = 'Starting…'; }
+      let o;
+      try {
+        o = await (await fetch('/api/create-order', { method:'POST', headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({ file: d.file }) })).json();
+      } catch { payToast('Network error starting payment.', true); reset(); return; }
+      if (o.already_purchased) { AUTH.purchases.add(d.file); triggerDownload(d); return; }
+      if (!o.order_id) { payToast(o.error || 'Couldn’t start the payment.', true); reset(); return; }
+      const rzp = new Razorpay({
+        key: o.key_id, order_id: o.order_id, amount: o.amount, currency: o.currency,
+        name: 'Everything You Need', description: d.title,
+        prefill: { email: (AUTH.user && AUTH.user.email) || '' },
+        theme: { color: '#c084fc' },
+        handler: async function (resp){
+          try {
+            const v = await fetch('/api/verify-payment', { method:'POST', headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({ razorpay_order_id: resp.razorpay_order_id,
+                                     razorpay_payment_id: resp.razorpay_payment_id,
+                                     razorpay_signature: resp.razorpay_signature }) });
+            const vd = await v.json();
+            if (v.ok && vd.ok) {
+              AUTH.purchases.add(d.file);
+              payToast('Payment successful — your download is starting.');
+              triggerDownload(d);
+              if (rmodal.classList.contains('open')) openModal(d);  // refresh to "Purchased"
+            } else { payToast(vd.error || 'Payment verification failed.', true); reset(); }
+          } catch { payToast('Couldn’t verify the payment. If you were charged, contact support.', true); reset(); }
+        },
+        modal: { ondismiss: reset }
+      });
+      rzp.open();
     }
 
     function openModal(d){
@@ -353,7 +434,7 @@
         <div class="rbanner has-img" style="background:${d.grad}">
           <img src="${hasImg}" alt="" onerror="this.remove(); this.parentElement.classList.remove('has-img');">
           <span class="ricon">${d.icon}</span>
-          <span class="rfree">${d.feat ? '★ Featured' : 'Free Resource'}</span>
+          <span class="rfree">${d.price ? '₹'+d.price : 'Free'}${d.feat ? ' · ★' : ''}</span>
           <span class="rfmt">${d.fmt}</span>
         </div>
         <div class="rbody">
@@ -369,6 +450,9 @@
             <button class="rcopy" id="rcopy">🔗 Copy Link</button>
           </div>
         </div>`;
+      // buy button (paid, not yet purchased)
+      const buyBtn = document.getElementById('rbuy');
+      if (buyBtn) buyBtn.addEventListener('click', () => buyAndDownload(d));
       // copy link
       const copyBtn = document.getElementById('rcopy');
       if (copyBtn) copyBtn.addEventListener('click', async () => {
@@ -409,6 +493,7 @@
               <span class="vfmt">${d.fmt}</span>
               ${d.feat ? '<span class="vstar">★ Featured</span>' : ''}
               <span class="vcat">${esc(d.cat)}</span>
+              <span class="vprice ${d.price ? 'paid' : 'free'}">${d.price ? '₹'+d.price : 'FREE'}</span>
             </div>
             <div class="vbody">
               <h3 class="vtitle">${esc(d.title)}</h3>
@@ -466,6 +551,7 @@
       render();
       countUp(document.getElementById('stat-files'), DATA.length);
       countUp(document.getElementById('stat-cats'), CATS.length);
+      countUp(document.getElementById('stat-free'), DATA.filter(d => d.price === 0).length);
       // hero entrance
       if (!REDUCE && animate) {
         animate('.lib-hero .eyebrow-pill', { opacity:[0,1], transform:['translateY(12px)','translateY(0)'] }, { duration:.6 });
@@ -473,9 +559,14 @@
         animate('.lib-hero p', { opacity:[0,1], transform:['translateY(16px)','translateY(0)'] }, { duration:.7, delay:.16 });
       }
       await AUTH.fetchMe();
+      // Load payment config + which files the user already owns.
+      try { PAY = await (await fetch('/api/pay-config')).json(); } catch { /* payments optional */ }
+      if (AUTH.user) {
+        try { const p = await (await fetch('/api/my-purchases')).json(); AUTH.purchases = new Set(p.purchased || []); } catch {}
+      }
       const note = document.getElementById('gate-note');
-      if (AUTH.user && note) note.textContent = `Signed in as ${AUTH.user.email} — download anything.`;
-      render(); // re-render so download buttons reflect auth
+      if (AUTH.user && note) note.textContent = `Signed in as ${AUTH.user.email} — free resources download instantly.`;
+      render(); // re-render so buttons reflect auth + purchases
       // deep-link: open a resource if URL has #r-<index>
       const m = location.hash.match(/^#r-(\d+)$/);
       if (m) { const d = DATA.find(x => String(x.i) === m[1]); if (d) openModal(d); }

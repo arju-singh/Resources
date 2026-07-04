@@ -57,12 +57,19 @@ if (!cards.length) {
   grid.outerHTML = `<div class="lp-empty">Nothing here yet — links will appear once added.</div>`;
 } else {
   grid.innerHTML = cards.map(cardHTML).join('');
+  // Reveal via IntersectionObserver + CSS class — robust: a class toggle can't fail
+  // to commit and leave cards stuck at the stylesheet's opacity:0 (unlike a WAAPI
+  // animation whose end state may not persist).
+  const io = ('IntersectionObserver' in window)
+    ? new IntersectionObserver((entries, obs) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
+      }, { rootMargin: '0px 0px -6% 0px', threshold: 0.1 })
+    : null;
   [...grid.children].forEach((el, idx) => {
     attachTilt(el);
-    if (REDUCE || !animate || !inView) { el.style.opacity=1; el.style.transform='none'; return; }
-    inView(el, () => animate(el,
-      { opacity:[0,1], transform:['translateY(34px) scale(.96)','translateY(0) scale(1)'] },
-      { duration:.55, delay:(idx%4)*.06, easing:[0.16,1,0.3,1] }), { amount:.15 });
+    if (REDUCE || !io) { el.classList.add('in'); return; }
+    el.style.transitionDelay = ((idx % 4) * 60) + 'ms';
+    io.observe(el);
   });
 }
 

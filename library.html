@@ -53,7 +53,9 @@
   .lib-grid { max-width: 1240px; margin: 34px auto 0; padding: 0 28px 40px;
     display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 26px; }
 
-  .vcard { opacity: 0; transform: translateY(34px); perspective: 1000px; will-change: transform, opacity; }
+  .vcard { opacity: 0; transform: translateY(34px); perspective: 1000px; will-change: transform, opacity;
+    transition: opacity .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1); }
+  .vcard.in { opacity: 1; transform: none; }
   .vtilt {
     position: relative; border-radius: 20px; overflow: hidden; transform-style: preserve-3d;
     background: rgba(20,20,23,.72); border: 1px solid var(--border); backdrop-filter: blur(8px);
@@ -197,7 +199,7 @@
         <p style="color:var(--muted);font-size:14px;margin-top:12px;max-width:240px;">AI tools & resources that work while you sleep.</p>
       </div>
       <div class="col"><h4>Explore</h4><a href="/library.html">Library</a><a href="/free-llm-apis.html">Free LLM APIs</a></div>
-      <div class="col"><h4>Company</h4><a href="#">About</a><a href="#">Contact</a></div>
+      <div class="col"><h4>Company</h4><a href="/#about">About</a><a href="/contact.html">Contact</a></div>
       <div class="col"><h4>Legal</h4><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/contact.html">Contact</a></div>
     </div>
     <div class="bottom">© 2026 AI Tools. All rights reserved.</div>
@@ -307,6 +309,13 @@
     const search = document.getElementById('search');
     const chipsEl = document.getElementById('chips');
     let activeCat = 'All';
+
+    // Reveal cards as they scroll into view (adds .in → CSS transitions them visible).
+    const revealIO = ('IntersectionObserver' in window)
+      ? new IntersectionObserver((entries, obs) => {
+          entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
+        }, { rootMargin: '0px 0px -6% 0px', threshold: 0.1 })
+      : null;
 
     const fmtSize = b => b < 1024 ? b+' B' : b < 1048576 ? (b/1024).toFixed(0)+' KB' : (b/1048576).toFixed(1)+' MB';
     const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -436,13 +445,13 @@
       frag.innerHTML = items.map(cardHTML).join('');
       const cards = [...frag.children];
       cards.forEach((c, idx) => { grid.appendChild(c); attachTilt(c); c.addEventListener('click', () => openModal(items[idx])); });
-      // reveal
+      // reveal — native IntersectionObserver + CSS class. Robust: unlike motion's
+      // WAAPI animate(), a class toggle can't fail to commit and leave cards stuck
+      // at the stylesheet's opacity:0 (the bug this replaces).
       cards.forEach((c, idx) => {
-        if (REDUCE || !animate || !inView) { c.style.opacity=1; c.style.transform='none'; return; }
-        inView(c, () => {
-          animate(c, { opacity:[0,1], transform:['translateY(34px) scale(.96)','translateY(0px) scale(1)'] },
-            { duration:0.6, delay:(idx%4)*0.07, easing:[0.16,1,0.3,1] });
-        }, { amount: 0.15 });
+        if (REDUCE || !revealIO) { c.classList.add('in'); return; }
+        c.style.transitionDelay = ((idx % 4) * 70) + 'ms';
+        revealIO.observe(c);
       });
     }
 

@@ -100,16 +100,24 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
         });
-        const data = await r.json();
-        if (r.ok) {
+        // The account API needs the app backend. On a static host (e.g. the
+        // Firebase preview) it isn't present, so the response is the host's 404
+        // HTML rather than JSON — detect that and degrade gracefully instead of
+        // surfacing a raw error.
+        let data = null;
+        try { data = await r.json(); } catch { data = null; }
+        if (r.ok && data) {
           showMsg(mode === 'signup' ? 'Account created! Redirecting…' : 'Logged in! Redirecting…', 'success');
           setTimeout(redirectAfterAuth, 700);
+        } else if (data && data.error) {
+          showMsg(data.error, 'error');
+          submitBtn.disabled = false;
         } else {
-          showMsg(data.error || 'Something went wrong.', 'error');
+          showMsg('Accounts run on the app server, which isn’t reachable here. Everything on the site is free to browse — no sign-in needed.', 'error');
           submitBtn.disabled = false;
         }
       } catch {
-        showMsg('Network error. Is the server running?', 'error');
+        showMsg('Can’t reach the account server right now. Everything else on the site is free to browse without an account.', 'error');
         submitBtn.disabled = false;
       }
     });

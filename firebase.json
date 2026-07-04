@@ -3,9 +3,13 @@
     "public": ".",
     "ignore": [
       "firebase.json",
+      "firebase.backend.json",
       "**/.*",
       "**/node_modules/**",
       "server.py",
+      "Dockerfile",
+      "deploy-backend.sh",
+      "DEPLOY.md",
       "*.db",
       "users.db",
       "rom/**",

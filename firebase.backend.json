@@ -1,0 +1,37 @@
+{
+  "_comment": "Used by deploy-backend.sh AFTER the Cloud Run service exists. Static assets stay on Firebase's CDN; auth, payments and downloads proxy to Cloud Run on the same domain (no CORS, cookies just work). Keep serviceId/region in sync with deploy-backend.sh.",
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "firebase.backend.json",
+      "**/.*",
+      "**/node_modules/**",
+      "server.py",
+      "Dockerfile",
+      "deploy-backend.sh",
+      "DEPLOY.md",
+      "*.db",
+      "users.db",
+      "rom/**",
+      "library/**",
+      "*.log",
+      "package*.json",
+      "README.md"
+    ],
+    "cleanUrls": false,
+    "trailingSlash": false,
+    "rewrites": [
+      { "source": "/api/**",   "run": { "serviceId": "eyn-backend", "region": "us-central1" } },
+      { "source": "/libdl",    "run": { "serviceId": "eyn-backend", "region": "us-central1" } },
+      { "source": "/libdl/**", "run": { "serviceId": "eyn-backend", "region": "us-central1" } },
+      { "source": "/download", "run": { "serviceId": "eyn-backend", "region": "us-central1" } }
+    ],
+    "headers": [
+      {
+        "source": "/static/**",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }]
+      }
+    ]
+  }
+}

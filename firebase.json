@@ -9,6 +9,7 @@
       "server.py",
       "Dockerfile",
       "deploy-backend.sh",
+      "sync-library.sh",
       "DEPLOY.md",
       "*.db",
       "users.db",
@@ -23,7 +24,12 @@
     "headers": [
       {
         "source": "/static/**",
-        "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }]
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=604800"
+          }
+        ]
       }
     ]
   }

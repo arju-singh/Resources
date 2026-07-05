@@ -28,3 +28,6 @@ library/
 
 # Firebase deploy cache
 .firebase/
+
+# Materialised free download files (deployed to Firebase, not git)
+library-files/

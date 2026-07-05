@@ -41,6 +41,9 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.environ.get("DB_PATH", os.path.join(ROOT, "users.db"))
 FILES_DIR = os.environ.get("FILES_DIR", os.path.join(ROOT, "files"))
 LIBRARY_DIR = os.environ.get("LIBRARY_DIR", os.path.join(ROOT, "library"))
+# Free, publicly-downloadable resources (slug-named). On the static host these
+# are served by the CDN directly; this route gives local dev the same paths.
+LIBFILES_DIR = os.environ.get("LIBFILES_DIR", os.path.join(ROOT, "library-files"))
 STATIC_DIR = os.path.join(ROOT, "static")
 
 # ---------- Configuration (all via environment — no secrets in source) ----------
@@ -590,6 +593,16 @@ class Handler(BaseHTTPRequestHandler):
                         {"error": "Purchase required to download this resource.",
                          "price": price, "file": safe}, 402)
             return self.serve_file(target, download_name=safe)
+
+        # Free library downloads (slug-named, no auth) — mirrors the static host.
+        if path.startswith("/library-files/"):
+            rel = path[len("/library-files/"):]
+            if is_sensitive_filename(rel):
+                return self.send_error(403, "Forbidden")
+            target = os.path.normpath(os.path.join(LIBFILES_DIR, rel))
+            if not os.path.abspath(target).startswith(os.path.abspath(LIBFILES_DIR) + os.sep):
+                return self.send_error(403, "Forbidden")
+            return self.serve_file(target, download_name=os.path.basename(rel))
 
         # Static: /static/* (supports nested dirs, e.g. /static/covers/x.png)
         if path.startswith("/static/"):

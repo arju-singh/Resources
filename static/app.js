@@ -1,11 +1,18 @@
 // Shared auth + nav helper for all pages
 const AUTH = {
   user: null,
+  backendUp: false,
   async fetchMe() {
+    this.backendUp = false;
     try {
       const r = await fetch('/api/me');
-      if (r.ok) { this.user = await r.json(); }
-      else { this.user = null; }
+      // A JSON reply (even a 401) means the backend is present. On the static
+      // host /api/me is a 404 HTML page, so we know there are no accounts.
+      const ct = r.headers.get('content-type') || '';
+      if (ct.indexOf('application/json') !== -1) {
+        this.backendUp = true;
+        this.user = r.ok ? await r.json() : null;
+      } else { this.user = null; }
     } catch { this.user = null; }
     return this.user;
   },
@@ -26,10 +33,13 @@ async function renderNavAuth() {
       <span class="email">${AUTH.user.email}</span>
       <button class="btn-ghost" id="logout-btn">Log Out</button>`;
     document.getElementById('logout-btn').addEventListener('click', () => AUTH.logout());
-  } else {
+  } else if (AUTH.backendUp) {
     slot.innerHTML = `
       <a class="btn-ghost" href="/login.html">Log In</a>
       <a class="btn-grad" href="/login.html?mode=signup">Sign Up</a>`;
+  } else {
+    // Static host with no backend — everything is free, no accounts needed.
+    slot.innerHTML = '';
   }
 }
 

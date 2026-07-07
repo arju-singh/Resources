@@ -29,7 +29,7 @@ Required env for live payments (set at deploy — never commit):
 Optional:
     PRICE_INR=99  PRICE_USD=4          per-file price per currency
     GRANT_TTL_DAYS=30  GRANT_MAX_DOWNLOADS=10
-    SENDGRID_API_KEY=SG.xxx  MAIL_FROM="Everything You Need <connect@arjusingh.com>"
+    RESEND_API_KEY=re_xxx  MAIL_FROM="Everything You Need <connect@arjusingh.com>"
     SITE_URL=https://resource-arjusingh.web.app   (used to build the emailed link)
 """
 import os, re, json, time, hmac, base64, sqlite3, hashlib, secrets, threading, mimetypes, urllib.parse, urllib.request
@@ -67,9 +67,11 @@ SUPPORTED_CURRENCIES = tuple(DEFAULT_PRICES.keys())
 GRANT_TTL_DAYS = int(os.environ.get("GRANT_TTL_DAYS", 30))
 GRANT_MAX_DOWNLOADS = int(os.environ.get("GRANT_MAX_DOWNLOADS", 10))
 
-# Email (SendGrid HTTP API). If unset, the download link is still returned in the
+# Email (Resend HTTP API). If unset, the download link is still returned in the
 # API response and shown on-screen, so the product works before email is wired.
-SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "")
+# For a first test with no domain setup, use MAIL_FROM="onboarding@resend.dev"
+# (Resend's sandbox sender — only delivers to your own Resend account email).
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 MAIL_FROM = os.environ.get("MAIL_FROM", "Everything You Need <connect@arjusingh.com>")
 
 # Default price PER PAGE. Files added to a page inherit its price unless the admin
@@ -284,9 +286,9 @@ def bump_download(token):
         conn.execute("UPDATE grants SET downloads = downloads + 1 WHERE token=?", (token,))
 
 def send_download_email(to_email, name, url, currency, amount):
-    """Send the download link via SendGrid. Returns True on success, False otherwise
+    """Send the download link via Resend. Returns True on success, False otherwise
     (caller still returns the link in the API response so nothing is lost)."""
-    if not SENDGRID_API_KEY:
+    if not RESEND_API_KEY:
         return False
     title = name or "your resource"
     html = (
@@ -297,26 +299,20 @@ def send_download_email(to_email, name, url, currency, amount):
         f"<p style=\"color:#888;font-size:12px\">Everything You Need · by Arju Singh</p>"
     )
     payload = json.dumps({
-        "personalizations": [{"to": [{"email": to_email}]}],
-        "from": _parse_from(MAIL_FROM),
+        "from": MAIL_FROM,               # Resend accepts a plain "Name <email>" string
+        "to": [to_email],
         "subject": f"Your download: {title}",
-        "content": [{"type": "text/html", "value": html}],
+        "html": html,
     }).encode()
     req = urllib.request.Request(
-        "https://api.sendgrid.com/v3/mail/send", data=payload, method="POST",
+        "https://api.resend.com/emails", data=payload, method="POST",
         headers={"Content-Type": "application/json",
-                 "Authorization": f"Bearer {SENDGRID_API_KEY}"})
+                 "Authorization": f"Bearer {RESEND_API_KEY}"})
     try:
         with urllib.request.urlopen(req, timeout=15) as r:
             return 200 <= r.status < 300
     except Exception:
         return False
-
-def _parse_from(s):
-    m = re.match(r"^(.*)<(.+@.+)>$", s.strip())
-    if m:
-        return {"name": m.group(1).strip(), "email": m.group(2).strip()}
-    return {"email": s.strip()}
 
 # ---------- Razorpay ----------
 def razorpay_create_order(fname, email, currency, amount):

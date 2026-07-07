@@ -83,18 +83,18 @@ else
   echo "  Add it later per DEPLOY.md and re-run to enable paid downloads."
 fi
 
-# --- 3b. Email delivery (optional — SendGrid, for the download-link emails) ----
-# Create the secret once:  printf %s "SG.xxx" | gcloud secrets create sendgrid-api-key --data-file=-
-if gcloud secrets describe "sendgrid-api-key" >/dev/null 2>&1; then
+# --- 3b. Email delivery (optional — Resend, for the download-link emails) ------
+# Create the secret once:  printf %s "re_xxx" | gcloud secrets create resend-api-key --data-file=-
+if gcloud secrets describe "resend-api-key" >/dev/null 2>&1; then
   PNUM="${PNUM:-$(gcloud projects describe "$PROJECT" --format='value(projectNumber)')}"
   RUNTIME_SA="${PNUM}-compute@developer.gserviceaccount.com"
-  gcloud secrets add-iam-policy-binding "sendgrid-api-key" \
+  gcloud secrets add-iam-policy-binding "resend-api-key" \
     --member="serviceAccount:${RUNTIME_SA}" --role="roles/secretmanager.secretAccessor" >/dev/null
   ENV_VARS="${ENV_VARS},MAIL_FROM=Everything You Need <connect@arjusingh.com>"
-  PAY_FLAGS+=(--set-secrets "SENDGRID_API_KEY=sendgrid-api-key:latest")
-  echo "▶ Email: ON (download links sent via SendGrid)"
+  PAY_FLAGS+=(--set-secrets "RESEND_API_KEY=resend-api-key:latest")
+  echo "▶ Email: ON (download links sent via Resend)"
 else
-  echo "▶ Email: OFF (no 'sendgrid-api-key' secret — link is shown on-screen after payment instead)."
+  echo "▶ Email: OFF (no 'resend-api-key' secret — link is shown on-screen after payment instead)."
 fi
 
 # --- 4. Build context: materialise the library symlinks into real files -------

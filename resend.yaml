@@ -1,0 +1,84 @@
+# Resend email setup — REFERENCE / CHECKLIST
+# ---------------------------------------------------------------------------
+# The backend sends the buyer's download link via Resend (https://resend.com).
+# Resend has no "apply this file" format, so this is a human checklist. Resend is
+# simpler than most: you can send a first test email in minutes with NO DNS, then
+# verify your domain when you're ready for real buyers.
+#
+# What the backend sends: after a verified payment, server.py's
+# send_download_email() POSTs to https://api.resend.com/emails → the buyer gets a
+# "Your download: <file>" email with a secure /dl?token=… link
+# (valid GRANT_TTL_DAYS days / GRANT_MAX_DOWNLOADS downloads).
+#
+# If RESEND_API_KEY is NOT set, nothing breaks — the link is shown on-screen after
+# payment instead. Email is an add-on.
+
+provider: resend
+purpose: Deliver the secure download link to buyers after payment.
+
+# 1) ACCOUNT
+account:
+  signup: https://resend.com/signup            # free tier = 3,000 emails/mo, 100/day
+  notes: Sign up with GitHub or email.
+
+# 2) API KEY  (this is the value your server needs)
+api_key:
+  where: Resend dashboard → API Keys → Create API Key
+  name: eyn-backend
+  permission: Sending access (Full Access is fine)
+  important: Copy the key (re_xxxxx) — shown once. Never commit it.
+
+# 3) SENDER — two paths
+sender:
+  # PATH A — instant test, NO DNS. Only delivers to YOUR OWN Resend signup email.
+  test_sandbox:
+    from: "onboarding@resend.dev"
+    set: MAIL_FROM="onboarding@resend.dev"
+    use_for: A quick end-to-end test before touching DNS.
+
+  # PATH B — real sending from your own address (needed for actual buyers).
+  verified_domain:
+    where: Resend dashboard → Domains → Add Domain
+    domain: arjusingh.com
+    steps:
+      - Add the domain; Resend shows a few DNS records (SPF/DKIM, and DMARC optional)
+      - Add those records at your DNS host (registrar / Cloudflare)
+      - Click Verify in Resend (usually minutes)
+      - Then send from any address on that domain, e.g. connect@arjusingh.com
+    dns_records_placeholder:                     # Resend gives you the real values
+      - { type: MX,   name: send.arjusingh.com,          value: "feedback-smtp.<region>.amazonses.com", priority: 10 }
+      - { type: TXT,  name: send.arjusingh.com,          value: "v=spf1 include:amazonses.com ~all" }
+      - { type: TXT,  name: resend._domainkey.arjusingh.com, value: "p=<dkim-public-key>" }
+      - { type: TXT,  name: _dmarc.arjusingh.com,        value: "v=DMARC1; p=none;" }   # optional but recommended
+
+# 4) WIRE IT INTO THE BACKEND  (env vars the server reads)
+env_vars:
+  RESEND_API_KEY: "re_xxxxxxxx"                        # the key from step 2
+  MAIL_FROM: "Everything You Need <connect@arjusingh.com>"  # or onboarding@resend.dev for the sandbox test
+
+apply_on_host:
+  render:
+    where: Render service → Environment tab
+    action: Add RESEND_API_KEY (and MAIL_FROM). Save → redeploys.
+    note: In render.yaml RESEND_API_KEY is declared "sync:false" — you paste the value here.
+  cloud_run:
+    where: Google Secret Manager + deploy-backend.sh (already wired)
+    commands:
+      - printf %s 're_xxxxxxxx' | gcloud secrets create resend-api-key --data-file=- --project resource-arjusingh
+      - export RAZORPAY_KEY_ID=rzp_live_...; export ADMIN_PASSWORD=...; ./deploy-backend.sh
+    note: deploy-backend.sh auto-detects the resend-api-key secret and turns email ON.
+
+# 5) VERIFY IT WORKS
+test:
+  - "Quick path: set MAIL_FROM=onboarding@resend.dev, buy a file with your Resend signup email, check that inbox."
+  - "Real path: verify arjusingh.com (step 3B), set MAIL_FROM=connect@arjusingh.com, then any buyer email works."
+  - 'Expect subject "Your download: <file name>" with a Download button.'
+
+# 6) LIMITS / TIPS
+notes:
+  - Free tier: 3,000 emails/month (100/day). Upgrade if you exceed it.
+  - onboarding@resend.dev ONLY reaches your own account email — use a verified
+    domain before selling to real buyers.
+  - The "from" must be onboarding@resend.dev OR an address on a verified domain,
+    or Resend returns an error and no mail sends.
+  - "API: POST https://api.resend.com/emails, Bearer re_xxx, body {from,to,subject,html}."

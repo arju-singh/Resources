@@ -5,7 +5,7 @@
 #   1. Render dashboard → New → Blueprint → pick the arju-singh/Resources repo.
 #      Render reads THIS file and provisions the service + persistent disk.
 #   2. It will prompt for the "sync: false" values (secrets) — enter them in the
-#      dashboard so they never live in git. See sendgrid.yaml + DEPLOY notes.
+#      dashboard so they never live in git. See resend.yaml + DEPLOY notes.
 #   3. Put your 82 paid files on the disk once (they are gitignored on purpose so
 #      they stay private): open the service Shell/SSH and from your laptop run
 #         rsync -av ~/Downloads/Resource/library-files/  /data/library-files/
@@ -64,7 +64,7 @@ services:
       - key: GRANT_MAX_DOWNLOADS
         value: "10"
 
-      # --- Email "from" (must match a verified SendGrid sender — see sendgrid.yaml) ---
+      # --- Email "from" (must match a verified Resend domain — see resend.yaml) ---
       - key: MAIL_FROM
         value: "Everything You Need <connect@arjusingh.com>"
 
@@ -82,5 +82,5 @@ services:
         sync: false
       - key: ADMIN_PASSWORD        # your /admin.html login
         sync: false
-      - key: SENDGRID_API_KEY      # SG.xxx — enables the download-link emails
+      - key: RESEND_API_KEY        # re_xxx — enables the download-link emails
         sync: false

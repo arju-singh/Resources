@@ -6,12 +6,10 @@ FROM python:3.12-slim
 WORKDIR /app
 COPY . /app
 
-# Cloud Run injects PORT (usually 8080); server.py reads it. SECURE_COOKIES=1
-# makes the session cookie HTTPS-only. DB_PATH points at the mounted volume so
-# accounts survive restarts (set at deploy time).
-ENV PORT=8080 \
-    SECURE_COOKIES=1 \
-    SESSION_TTL_DAYS=30
+# Cloud Run injects PORT (usually 8080); server.py reads it. DB_PATH, SITE_URL,
+# RAZORPAY_* and SENDGRID_* are set at deploy time (deploy-backend.sh) — DB_PATH
+# points at the mounted GCS volume so orders + emailed download links persist.
+ENV PORT=8080
 
 EXPOSE 8080
 CMD ["python3", "server.py"]

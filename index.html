@@ -75,7 +75,7 @@
 
   <nav>
     <a class="brand" href="/"><span class="bolt">⚡</span> Everything You Need</a>
-    <div class="nav-links">
+        <div class="nav-links">
       <a href="/free-llm-apis.html">Free LLM APIs</a>
       <a href="/library.html">Library</a>
       <a href="/links.html">Links</a>
@@ -88,14 +88,14 @@
   <header class="h-hero">
     <span class="eyebrow-pill">⚡ Built by Arju Singh · Free for everyone</span>
     <h1>Everything <span class="g">You Need</span></h1>
-    <p>One vault for the AI, coding &amp; career resources, free LLM API keys, and hand-picked tools I actually use. <b>Sign in once — take whatever helps.</b></p>
+    <p>One vault for the AI, coding &amp; career resources, free LLM API keys, and hand-picked tools I actually use. <b>Library files are ₹99 · $4 each — the API keys &amp; links are free.</b></p>
     <div class="h-cta">
       <a class="btn-grad" href="/library.html">Browse the Library</a>
       <a class="btn-ghost" href="/links.html">Explore the Links</a>
     </div>
     <div class="h-stats">
-      <div class="h-stat"><div class="num" data-count="150" id="s-files">0</div><div class="lbl">Resources</div></div>
-      <div class="h-stat"><div class="num" data-count="60" id="s-links">0</div><div class="lbl">Curated Links</div></div>
+      <div class="h-stat"><div class="num" data-count="82" id="s-files">0</div><div class="lbl">Resources</div></div>
+      <div class="h-stat"><div class="num" data-count="61" id="s-links">0</div><div class="lbl">Curated Links</div></div>
       <div class="h-stat"><div class="num">234+</div><div class="lbl">Free AI Models</div></div>
     </div>
   </header>
@@ -103,14 +103,14 @@
   <!-- What's inside -->
   <section class="h-sec">
     <span class="eyebrow-pill">What's inside</span>
-    <h2>Three things, all free</h2>
-    <p class="lead">Everything here is curated and kept up to date — pick whatever moves your work forward.</p>
+    <h2>Three things worth your time</h2>
+    <p class="lead">Everything here is curated and kept up to date — the API keys and links are free, and Library files are a flat ₹99 · $4 each.</p>
     <div class="inside">
       <a class="icard" href="/library.html">
         <span class="go">↗</span><div class="ic">📚</div>
         <h3>The Library</h3>
-        <p>A vault of guides, prompt packs, roadmaps, cheat sheets and templates across AI, Claude, coding, design &amp; careers — sign in to download.</p>
-        <div class="cnt">150+ resources · 12 categories</div>
+        <p>A vault of guides, prompt packs, roadmaps, cheat sheets and templates across AI, Claude, coding, design &amp; careers — ₹99 · $4 per file, emailed instantly.</p>
+        <div class="cnt" id="c-library">82 resources · 11 categories</div>
       </a>
       <a class="icard" href="/free-llm-apis.html">
         <span class="go">↗</span><div class="ic">🔑</div>
@@ -122,7 +122,7 @@
         <span class="go">↗</span><div class="ic">🔗</div>
         <h3>Links</h3>
         <p>Hand-picked websites, GitHub repos, Google Docs, Notion pages &amp; communities — separated by type so you find things fast.</p>
-        <div class="cnt">60+ links · 5 categories</div>
+        <div class="cnt" id="c-links">61 links · 5 categories</div>
       </a>
     </div>
   </section>
@@ -175,8 +175,8 @@
   <section class="h-sec faq" style="max-width:800px;">
     <span class="eyebrow-pill">FAQ</span>
     <h2 style="margin-bottom:20px;">Frequently asked questions</h2>
-    <details><summary>Do I need to sign in?</summary><div class="ans">Only to download from the Library. Browsing the Library, Free LLM APIs and Links is open — sign-up is free and takes seconds.</div></details>
-    <details><summary>Is everything really free?</summary><div class="ans">Yes. Every resource, API link and tool here is free. No credit card, no subscription.</div></details>
+    <details><summary>Do I need an account?</summary><div class="ans">No accounts, ever. Browsing is open. To buy a Library file you just enter your email at checkout — we email you a secure download link you can reuse for 30 days.</div></details>
+    <details><summary>How much do resources cost?</summary><div class="ans">Each Library file is a flat <b>₹99 in India</b> or <b>$4 internationally</b> — pay once via Razorpay and the download link is emailed instantly. The Free LLM API keys and the Links directory are completely free.</div></details>
     <details><summary>Who is this for?</summary><div class="ans">Anyone building with AI or breaking into tech — developers, founders, job-seekers and creators.</div></details>
     <details><summary>Can I reach Arju?</summary><div class="ans">Yes — via <a href="https://arjusingh.com" target="_blank" rel="noopener" style="color:#c084fc;">arjusingh.com</a>, LinkedIn, GitHub, or email.</div></details>
   </section>
@@ -194,15 +194,29 @@
     <div class="bottom">© 2026 Everything You Need · Built by Arju Singh.</div>
   </footer>
 
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=20260707"></script>
+  <!-- Real data sources — hero stats are derived from these so they never drift -->
+  <script src="/static/library-data.js?v=20260707"></script>
+  <script src="/static/links-data.js?v=20260707"></script>
   <script type="module">
     let animate, inView;
     try { ({ animate, inView } = await import('https://cdn.jsdelivr.net/npm/motion@11.11.13/+esm')); } catch(e){}
     const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    function countUp(el,to){ if(REDUCE||!animate){el.textContent=to;return;} animate(0,to,{duration:1.2,easing:'ease-out',onUpdate:v=>el.textContent=Math.round(v)}); }
-    countUp(document.getElementById('s-files'),150);
-    countUp(document.getElementById('s-links'),60);
+    // Live counts pulled straight from the library & links data files.
+    const RES       = (window.LIBRARY      || []).length || 82;
+    const LIB_CATS  = (window.LIBRARY_CATS || []).length || 11;
+    const LINKS     = (window.LINKS        || []).length || 61;
+    const LINK_CATS = (window.LINK_CATS    || []).length || 5;
+
+    // Keep the "what's inside" card blurbs in sync too.
+    const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+    setText('c-library', `${RES} resources · ${LIB_CATS} categories`);
+    setText('c-links',   `${LINKS} links · ${LINK_CATS} categories`);
+
+    function countUp(el,to){ if(!el)return; if(REDUCE||!animate){el.textContent=to;return;} animate(0,to,{duration:1.2,easing:'ease-out',onUpdate:v=>el.textContent=Math.round(v)}); }
+    countUp(document.getElementById('s-files'),RES);
+    countUp(document.getElementById('s-links'),LINKS);
     if(!REDUCE&&animate){
       animate('.h-hero .eyebrow-pill',{opacity:[0,1],transform:['translateY(12px)','translateY(0)']},{duration:.6});
       animate('.h-hero h1',{opacity:[0,1],transform:['translateY(20px)','translateY(0)']},{duration:.7,delay:.08});

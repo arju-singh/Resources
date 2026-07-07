@@ -115,11 +115,12 @@
   <canvas id="bg-canvas"></canvas>
   <nav>
     <a class="brand" href="/"><span class="bolt">⚡</span> Everything You Need</a>
-    <div class="nav-links">
+        <div class="nav-links">
       <a href="/free-llm-apis.html">Free LLM APIs</a>
       <a href="/library.html">Library</a>
       <a href="/links.html">Links</a>
       <a href="/checklist.html" class="active">Checklist</a>
+      <a href="/userpain.html">User Pain</a>
       <span id="nav-auth"></span>
     </div>
   </nav>
@@ -158,7 +159,38 @@
             <span class="open">Open guide <span class="arr">→</span></span>
           </div>
         </button>
+
+        <button class="clc" data-open="mobile" type="button" style="--c:#34d399;--cs:rgba(52,211,153,.5);--c1:#34d399;--c2:#22d3ee;">
+          <div class="badge">📲</div>
+          <div class="kind">Interactive Checklist</div>
+          <h2>Mobile App Launch Checklist</h2>
+          <p>A complete pre-launch checklist for publishing on the App Store and Google Play — from idea and design through development, testing, store prep, legal and post-launch. Tick items off; progress is saved.</p>
+          <div class="mini-bar" id="mob-mini-bar"><span id="mob-mini-fill"></span></div>
+          <div class="foot">
+            <span class="meta" id="mob-meta">103 items · 9 stages</span>
+            <span class="open">Open checklist <span class="arr">→</span></span>
+          </div>
+        </button>
+
+        <button class="clc" data-open="dash" type="button" style="--c:#fbbf24;--cs:rgba(251,191,36,.45);--c1:#fbbf24;--c2:#fb7185;">
+          <div class="badge">📊</div>
+          <div class="kind">Step-by-step Guide</div>
+          <h2>The 10-Minute Premium Dashboard</h2>
+          <p>Ship a dashboard that doesn't look AI-generated — in under 10 minutes. Pick a block, add a custom background, animate it, and publish. Three steps.</p>
+          <div class="mini-bar" id="dash-mini-bar"><span id="dash-mini-fill"></span></div>
+          <div class="foot">
+            <span class="meta" id="dash-card-meta">3 steps · ~10 min</span>
+            <span class="open">Open guide <span class="arr">→</span></span>
+          </div>
+        </button>
       </div>
+
+      <!-- ===== Premium downloadable resources (admin-managed · paid ₹199 / $10) ===== -->
+      <section id="cl-res-wrap" class="cl-res" style="display:none">
+        <h2 class="cl-res-title">Premium Resources <span class="cl-res-price">₹199 · $10 each</span></h2>
+        <p class="cl-res-sub">Paid, downloadable checklists &amp; guides — pay once, we email your download link.</p>
+        <div id="cl-resources" class="cl-cards"></div>
+      </section>
     </div>
 
     <!-- ===== SaaS checklist view ===== -->
@@ -355,6 +387,109 @@
         </div>
       </div>
     </section>
+
+    <!-- ===== Mobile App Launch checklist view ===== -->
+    <section class="cl-view" id="view-mobile">
+      <button class="cl-back" data-back type="button">← All checklists & guides</button>
+      <div class="cl-view-head">
+        <h2>Mobile App <span class="g">Launch</span> Checklist</h2>
+        <p>A complete pre-launch checklist for publishing your app on the App Store and Google Play Store. Work top to bottom, but revisit earlier stages as needed — shipping beats perfection. Progress is saved automatically in this browser.</p>
+      </div>
+
+      <div class="cl-progress">
+        <div class="row">
+          <span class="label">Progress</span>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <span class="count" id="mob-count">0 / 0</span>
+            <button class="cl-reset" id="mob-reset" type="button">Reset</button>
+          </div>
+        </div>
+        <div class="cl-bar"><span id="mob-fill"></span></div>
+      </div>
+
+      <div class="cl-done-banner" id="mob-done">🎉 All done — you shipped! Screenshot and celebrate the moment.</div>
+
+      <div id="mob-groups"></div>
+
+      <div class="gd-final" style="margin-top:22px;">Tip: Shipping beats perfection — launch with your MVP and iterate fast.</div>
+    </section>
+
+    <!-- ===== 10-Minute Premium Dashboard guide view ===== -->
+    <section class="cl-view" id="view-dash">
+      <button class="cl-back" data-back type="button">← All checklists & guides</button>
+      <div class="cl-view-head">
+        <h2>The 10-Minute <span class="g">Premium Dashboard</span> Workflow</h2>
+        <p>The 3-step process to ship a dashboard that doesn't look AI-generated — in under 10 minutes. Tick each step as you finish; progress saves in this browser.</p>
+      </div>
+
+      <div class="cl-progress">
+        <div class="row">
+          <span class="label">Your progress</span>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <span class="count" id="dash-count">0 / 3</span>
+            <button class="cl-reset" id="dash-reset" type="button">Reset</button>
+          </div>
+        </div>
+        <div class="cl-bar"><span id="dash-fill"></span></div>
+      </div>
+
+      <div class="cl-done-banner" id="dash-done">🎉 All 3 steps done — your dashboard is live. Ship it!</div>
+
+      <div class="gd">
+        <div class="gd-intro">A premium dashboard is a <b>block + a custom background + motion</b>. Get those three right and it stops looking like every other AI build.</div>
+
+        <!-- Step 1 -->
+        <div class="gd-step" data-step="1">
+          <label class="gd-check"><input type="checkbox" data-dash="d1"><span class="gd-check-box"></span></label>
+          <h3><span class="num">1</span> Pick a block <span class="time">~2 min</span></h3>
+          <div class="gd-tool">🧱 Tool: Shadcn blocks</div>
+          <p>Go to <b>efferd.com/blocks/dashboard</b> and pick the dashboard block you like. Copy its prompt and paste it into <b>Claude Code</b>.</p>
+          <ul>
+            <li>Then describe what the dashboard is <b>for</b> — so Claude adapts the template instead of just replicating it.</li>
+          </ul>
+          <div class="gd-tip">👉 The more context you give (audience, key metrics, tone), the less generic the result.</div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="gd-step" data-step="2">
+          <label class="gd-check"><input type="checkbox" data-dash="d2"><span class="gd-check-box"></span></label>
+          <h3><span class="num">2</span> Add a custom background with Limora <span class="time">~4 min</span></h3>
+          <div class="gd-tool">🎨 Tool: Limora</div>
+          <p>This is what makes your dashboard stop looking like every other AI build. Open <b>Limora</b> and go to <b>Background Image</b>.</p>
+          <ul>
+            <li>Describe the visual you want and adjust the settings</li>
+            <li>Download the image</li>
+            <li>Upload it to Claude Code and ask it to add it to your dashboard as a <b>banner</b></li>
+          </ul>
+          <div class="gd-tip">🎨 Get Limora at <b>limora.ai</b> — start generating on-brand assets.</div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="gd-step" data-step="3">
+          <label class="gd-check"><input type="checkbox" data-dash="d3"><span class="gd-check-box"></span></label>
+          <h3><span class="num">3</span> Animate your interface <span class="time">~4 min</span></h3>
+          <div class="gd-tool">✨ Tool: transitions.dev skill</div>
+          <p>Install the <b>transitions.dev</b> skill in Claude Code, then:</p>
+          <ul>
+            <li>Ask it to animate your interface</li>
+            <li>Refine the design until it feels right</li>
+            <li>Once everything looks good, ask Claude to <b>publish</b> it — and your dashboard is live</li>
+          </ul>
+        </div>
+
+        <!-- Resources -->
+        <div class="gd-block">
+          <h3>🔗 Resources</h3>
+          <div class="gd-tips">
+            <div class="tip"><span>•</span>Shadcn blocks — efferd.com/blocks/dashboard</div>
+            <div class="tip"><span>•</span>Limora — limora.ai</div>
+            <div class="tip"><span>•</span>Transitions skill — transitions.dev</div>
+            <div class="tip"><span>•</span>Claude Code — claude.com/claude-code</div>
+          </div>
+          <div class="gd-final">Block + background + motion = premium.</div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="site">
@@ -370,10 +505,10 @@
     <div class="bottom">© 2026 AI Tools. All rights reserved.</div>
   </footer>
 
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=20260707"></script>
   <script>
   (function () {
-    var GROUPS = [
+    var SAAS_GROUPS = [
       { icon: "✅", title: "Legal & Compliance", items: [
         { t: "Privacy Policy page" },
         { t: "Terms & Conditions (Terms of Service)" },
@@ -517,167 +652,320 @@
       ]}
     ];
 
-    var STORE_KEY = "saas-prelaunch-checklist-v1";
-    var state = {};
-    try { state = JSON.parse(localStorage.getItem(STORE_KEY) || "{}") || {}; } catch (e) { state = {}; }
+    var MOBILE_GROUPS = [
+      { icon: "💡", title: "Stage 1: Idea & Planning", items: [
+        { t: "Define the core problem your app solves" },
+        { t: "Identify your target audience (age, platform preference, behaviour)" },
+        { t: "Research competitors and note gaps in the market" },
+        { t: "Define your unique value proposition (what makes your app different)" },
+        { t: "Decide on monetisation model (free, freemium, paid, subscriptions, ads)" },
+        { t: "List your MVP (Minimum Viable Product) features — cut everything else" },
+        { t: "Set a realistic timeline with milestones" },
+        { t: "Choose your tech stack (React Native Expo, Flutter, native, etc.)" },
+        { t: "Decide on a name and check availability on both stores" },
+        { t: "Register a domain and social handles for your app brand" }
+      ]},
+      { icon: "🎨", title: "Stage 2: Design", items: [
+        { t: "Create user personas for your target audience" },
+        { t: "Map out the core user flow (screens and navigation)" },
+        { t: "Build low-fidelity wireframes for all key screens" },
+        { t: "Design a high-fidelity UI prototype (Figma, etc.)" },
+        { t: "Define your design system (colours, typography, spacing, components)" },
+        { t: "Design app icon (1024x1024px, no alpha/transparency)" },
+        { t: "Design splash/loading screen" },
+        { t: "Ensure designs meet accessibility standards (contrast ratios, font sizes)" },
+        { t: "Get feedback on designs from at least 3 real users" },
+        { t: "Iterate on designs based on feedback before building" }
+      ]},
+      { icon: "🛠️", title: "Stage 3: Development", items: [
+        { t: "Set up your project repository (Git) with a clear branching strategy" },
+        { t: "Configure your development environment and build tools" },
+        { t: "Build core features first (MVP only — resist scope creep)" },
+        { t: "Write clean, commented code with consistent naming conventions" },
+        { t: "Implement proper navigation structure" },
+        { t: "Integrate analytics (Firebase, Amplitude, Mixpanel, etc.)" },
+        { t: "Implement crash reporting (Sentry, Crashlytics, etc.)" },
+        { t: "Add proper error handling and user-facing error messages" },
+        { t: "Set up push notifications (if applicable)" },
+        { t: "Integrate authentication (if applicable) using a proven solution" },
+        { t: "Implement deep linking" },
+        { t: "Handle offline states gracefully" },
+        { t: "Implement proper loading and empty states for all screens" },
+        { t: "Store sensitive data securely (Keychain/Keystore — never plain storage)" },
+        { t: "Remove all hardcoded secrets, API keys, and debug logs before release" }
+      ]},
+      { icon: "🧪", title: "Stage 4: Testing", items: [
+        { t: "Test on multiple physical devices (not just simulators)" },
+        { t: "Test on minimum supported iOS version" },
+        { t: "Test on minimum supported Android version" },
+        { t: "Test on different screen sizes and aspect ratios" },
+        { t: "Test all user flows end-to-end" },
+        { t: "Test edge cases (empty states, network failure, low battery, etc.)" },
+        { t: "Test with slow/no network connection" },
+        { t: "Run accessibility audit (screen reader compatibility, tap target sizes)" },
+        { t: "Performance test — check for memory leaks and janky animations" },
+        { t: "Security audit — check for data exposure, insecure storage, weak auth" },
+        { t: "Conduct beta testing with real users (TestFlight / Firebase App Distribution)" },
+        { t: "Gather and action beta tester feedback before submitting" },
+        { t: "Verify all third-party SDK licences are compliant" }
+      ]},
+      { icon: "🍎", title: "Stage 5: App Store Preparation (Apple App Store)", items: [
+        { t: "Enrol in the Apple Developer Program ($99/year)" },
+        { t: "Create your app record in App Store Connect" },
+        { t: "Prepare app screenshots for all required device sizes (6.5\", 5.5\", 12.9\" iPad if applicable)" },
+        { t: "Write a compelling app description (first 3 lines matter most)" },
+        { t: "Write a concise subtitle (30 characters max)" },
+        { t: "Research and add relevant keywords (100 characters max)" },
+        { t: "Set your app category and subcategory" },
+        { t: "Set your age rating correctly" },
+        { t: "Complete the privacy questionnaire and link your privacy policy URL" },
+        { t: "Add your support URL and marketing URL" },
+        { t: "Set pricing and availability (countries)" },
+        { t: "Configure in-app purchases or subscriptions in App Store Connect (if applicable)" },
+        { t: "Build a release version with production credentials (not development)" },
+        { t: "Submit for App Review — allow 1-3 days for review" }
+      ]},
+      { icon: "🤖", title: "Stage 6: Google Play Store Preparation", items: [
+        { t: "Register a Google Play Developer account ($25 one-time fee)" },
+        { t: "Create your app in the Google Play Console" },
+        { t: "Prepare a feature graphic (1024x500px)" },
+        { t: "Prepare screenshots for phone and tablet (at least 2 per form factor)" },
+        { t: "Optionally prepare a short promo video (30 seconds, YouTube link)" },
+        { t: "Write a short description (80 characters max)" },
+        { t: "Write a full description (4000 characters max)" },
+        { t: "Set your app category and tags" },
+        { t: "Complete the content rating questionnaire (IARC)" },
+        { t: "Set up your data safety section (what data you collect and why)" },
+        { t: "Add your privacy policy URL" },
+        { t: "Set pricing and distribution countries" },
+        { t: "Configure in-app products or subscriptions (if applicable)" },
+        { t: "Upload a signed release AAB (Android App Bundle)" },
+        { t: "Set up a Closed Testing track first (recommended for new accounts)" },
+        { t: "Graduate to Open Testing, then Production once approved" }
+      ]},
+      { icon: "⚖️", title: "Stage 7: Legal & Compliance", items: [
+        { t: "Publish a Privacy Policy (required by both stores — not optional)" },
+        { t: "Publish Terms of Service / Terms of Use" },
+        { t: "Comply with GDPR if you have EU users (consent, data deletion rights)" },
+        { t: "Comply with COPPA if your app targets children under 13" },
+        { t: "Review all third-party SDKs for their own privacy requirements" },
+        { t: "Ensure your app does not violate any store policies (review both guidelines carefully)" },
+        { t: "If your app handles payments, ensure PCI compliance" },
+        { t: "Register your app's trademark if warranted" }
+      ]},
+      { icon: "🚀", title: "Stage 8: Launch Day", items: [
+        { t: "Set a specific launch date and work backward from it" },
+        { t: "Prepare your launch announcement post (LinkedIn, Twitter/X, etc.)" },
+        { t: "Brief your network and early supporters to leave reviews on day one" },
+        { t: "Publish your product on Product Hunt (schedule in advance)" },
+        { t: "Share in relevant communities (Reddit, Facebook groups, Discord, etc.)" },
+        { t: "Send a launch email to your waitlist (if you have one)" },
+        { t: "Monitor crash reports and analytics in real time on launch day" },
+        { t: "Respond quickly to any critical bugs with a hotfix plan ready" },
+        { t: "Screenshot and celebrate the moment — you shipped!" }
+      ]},
+      { icon: "📈", title: "Stage 9: Post-Launch", items: [
+        { t: "Monitor reviews and respond to user feedback professionally" },
+        { t: "Track key metrics weekly (downloads, retention, crash-free rate, ratings)" },
+        { t: "Gather qualitative feedback (user interviews, in-app surveys)" },
+        { t: "Prioritise your next feature release based on real user data" },
+        { t: "Maintain a regular update cadence to stay relevant on store algorithms" },
+        { t: "Run A/B tests on your store listing (screenshots, description) via ASO tools" },
+        { t: "Set up keyword rank tracking for App Store Optimisation (ASO)" },
+        { t: "Plan a version 1.1 with the top user-requested fixes/features" }
+      ]}
+    ];
 
-    var groupsEl = document.getElementById("cl-groups");
-    var countEl = document.getElementById("cl-count");
-    var fillEl = document.getElementById("cl-fill");
-    var doneEl = document.getElementById("cl-done");
-    var miniBar = document.getElementById("mini-bar");
-    var miniFill = document.getElementById("mini-fill");
-    var saasMeta = document.getElementById("saas-meta");
-    var total = 0;
-    var boxes = [];
+    // Generic interactive-checklist builder shared by the SaaS and Mobile lists.
+    function initChecklist(opts) {
+      var GROUPS = opts.groups;
+      var unit = opts.unit || "sections";
+      var state = {};
+      try { state = JSON.parse(localStorage.getItem(opts.storeKey) || "{}") || {}; } catch (e) { state = {}; }
 
-    GROUPS.forEach(function (g, gi) {
-      var section = document.createElement("section");
-      section.className = "cl-group";
+      var groupsEl = document.getElementById(opts.groupsId);
+      var countEl = document.getElementById(opts.countId);
+      var fillEl = document.getElementById(opts.fillId);
+      var doneEl = document.getElementById(opts.doneId);
+      var miniBar = document.getElementById(opts.miniBarId);
+      var miniFill = document.getElementById(opts.miniFillId);
+      var cardMeta = document.getElementById(opts.metaId);
+      var total = 0;
+      var boxes = [];
 
-      var h = document.createElement("h3");
-      h.innerHTML = '<span>' + g.icon + '</span><span>' + g.title + '</span>';
-      section.appendChild(h);
+      function defaultMeta() { return total + " items · " + GROUPS.length + " " + unit; }
 
-      var meta = document.createElement("div");
-      meta.className = "grp-meta";
-      meta.setAttribute("data-grp", gi);
-      section.appendChild(meta);
+      GROUPS.forEach(function (g, gi) {
+        var section = document.createElement("section");
+        section.className = "cl-group";
 
-      g.items.forEach(function (it, ii) {
-        var id = "g" + gi + "i" + ii;
-        total++;
-        var label = document.createElement("label");
-        label.className = "cl-item";
+        var h = document.createElement("h3");
+        h.innerHTML = '<span>' + g.icon + '</span><span>' + g.title + '</span>';
+        section.appendChild(h);
 
-        var box = document.createElement("input");
-        box.type = "checkbox";
-        box.id = id;
-        box.checked = !!state[id];
+        var meta = document.createElement("div");
+        meta.className = "grp-meta";
+        meta.setAttribute("data-grp", gi);
+        section.appendChild(meta);
 
-        var txt = document.createElement("span");
-        txt.className = "txt";
-        txt.textContent = it.t;
+        g.items.forEach(function (it, ii) {
+          var id = opts.idPrefix + "g" + gi + "i" + ii;
+          total++;
+          var label = document.createElement("label");
+          label.className = "cl-item";
 
-        label.appendChild(box);
-        label.appendChild(txt);
-        section.appendChild(label);
+          var box = document.createElement("input");
+          box.type = "checkbox";
+          box.id = id;
+          box.checked = !!state[id];
 
-        box.addEventListener("change", function () {
-          state[id] = box.checked;
-          save();
-          render();
+          var txt = document.createElement("span");
+          txt.className = "txt";
+          txt.textContent = it.t;
+
+          label.appendChild(box);
+          label.appendChild(txt);
+          section.appendChild(label);
+
+          box.addEventListener("change", function () {
+            state[id] = box.checked;
+            save();
+            render();
+          });
+          boxes.push({ box: box, gi: gi });
         });
-        boxes.push({ box: box, gi: gi });
+
+        groupsEl.appendChild(section);
       });
 
-      groupsEl.appendChild(section);
-    });
+      cardMeta.textContent = defaultMeta();
 
-    saasMeta.textContent = total + " items · " + GROUPS.length + " sections";
-
-    function save() {
-      try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
-    }
-
-    function render() {
-      var done = boxes.filter(function (b) { return b.box.checked; }).length;
-      countEl.textContent = done + " / " + total;
-      var pct = total ? Math.round((done / total) * 100) : 0;
-      fillEl.style.width = pct + "%";
-      doneEl.classList.toggle("show", done === total && total > 0);
-
-      // Card mini progress
-      if (done > 0) {
-        miniBar.classList.add("on");
-        miniFill.style.width = pct + "%";
-        saasMeta.textContent = done + " / " + total + " done · " + pct + "%";
-      } else {
-        miniBar.classList.remove("on");
-        saasMeta.textContent = total + " items · " + GROUPS.length + " sections";
+      function save() {
+        try { localStorage.setItem(opts.storeKey, JSON.stringify(state)); } catch (e) {}
       }
 
-      // Per-group counts
-      GROUPS.forEach(function (g, gi) {
-        var grpBoxes = boxes.filter(function (b) { return b.gi === gi; });
-        var gd = grpBoxes.filter(function (b) { return b.box.checked; }).length;
-        var m = groupsEl.querySelector('.grp-meta[data-grp="' + gi + '"]');
-        if (m) m.textContent = gd + " of " + grpBoxes.length + " done";
+      function render() {
+        var done = boxes.filter(function (b) { return b.box.checked; }).length;
+        countEl.textContent = done + " / " + total;
+        var pct = total ? Math.round((done / total) * 100) : 0;
+        fillEl.style.width = pct + "%";
+        doneEl.classList.toggle("show", done === total && total > 0);
+
+        // Card mini progress
+        if (done > 0) {
+          miniBar.classList.add("on");
+          miniFill.style.width = pct + "%";
+          cardMeta.textContent = done + " / " + total + " done · " + pct + "%";
+        } else {
+          miniBar.classList.remove("on");
+          cardMeta.textContent = defaultMeta();
+        }
+
+        // Per-group counts
+        GROUPS.forEach(function (g, gi) {
+          var grpBoxes = boxes.filter(function (b) { return b.gi === gi; });
+          var gd = grpBoxes.filter(function (b) { return b.box.checked; }).length;
+          var m = groupsEl.querySelector('.grp-meta[data-grp="' + gi + '"]');
+          if (m) m.textContent = gd + " of " + grpBoxes.length + " done";
+        });
+      }
+
+      document.getElementById(opts.resetId).addEventListener("click", function () {
+        state = {};
+        save();
+        boxes.forEach(function (b) { b.box.checked = false; });
+        render();
       });
+
+      render();
     }
 
-    document.getElementById("cl-reset").addEventListener("click", function () {
-      state = {};
-      save();
-      boxes.forEach(function (b) { b.box.checked = false; });
-      render();
+    initChecklist({
+      groups: SAAS_GROUPS, storeKey: "saas-prelaunch-checklist-v1", idPrefix: "",
+      groupsId: "cl-groups", countId: "cl-count", fillId: "cl-fill", doneId: "cl-done",
+      miniBarId: "mini-bar", miniFillId: "mini-fill", metaId: "saas-meta", resetId: "cl-reset"
     });
 
-    render();
+    initChecklist({
+      groups: MOBILE_GROUPS, storeKey: "mobile-app-launch-checklist-v1", idPrefix: "m-", unit: "stages",
+      groupsId: "mob-groups", countId: "mob-count", fillId: "mob-fill", doneId: "mob-done",
+      miniBarId: "mob-mini-bar", miniFillId: "mob-mini-fill", metaId: "mob-meta", resetId: "mob-reset"
+    });
 
-    /* ===== iOS 24-hour guide checklist ===== */
-    (function () {
-      var IOS_KEY = "ios-launch-checklist-v1";
-      var iosState = {};
-      try { iosState = JSON.parse(localStorage.getItem(IOS_KEY) || "{}") || {}; } catch (e) { iosState = {}; }
+    /* ===== Generic step-by-step guide (iOS + Dashboard) ===== */
+    function initGuide(opts) {
+      var state = {};
+      try { state = JSON.parse(localStorage.getItem(opts.storeKey) || "{}") || {}; } catch (e) { state = {}; }
 
-      var iosBoxes = Array.prototype.slice.call(document.querySelectorAll('input[data-ios]'));
-      var iosCount = document.getElementById("ios-count");
-      var iosFill = document.getElementById("ios-fill");
-      var iosDone = document.getElementById("ios-done");
-      var iosMiniBar = document.getElementById("ios-mini-bar");
-      var iosMiniFill = document.getElementById("ios-mini-fill");
-      var iosCardMeta = document.getElementById("ios-card-meta");
-      var iosTotal = iosBoxes.length;
+      var boxes = Array.prototype.slice.call(document.querySelectorAll('input[' + opts.attr + ']'));
+      var countEl = document.getElementById(opts.countId);
+      var fillEl = document.getElementById(opts.fillId);
+      var doneEl = document.getElementById(opts.doneId);
+      var miniBar = document.getElementById(opts.miniBarId);
+      var miniFill = document.getElementById(opts.miniFillId);
+      var cardMeta = document.getElementById(opts.metaId);
+      var total = boxes.length;
 
-      function iosSave() { try { localStorage.setItem(IOS_KEY, JSON.stringify(iosState)); } catch (e) {} }
+      function save() { try { localStorage.setItem(opts.storeKey, JSON.stringify(state)); } catch (e) {} }
 
-      function iosRender() {
+      function render() {
         var done = 0;
-        iosBoxes.forEach(function (b) {
+        boxes.forEach(function (b) {
           if (b.checked) done++;
           var step = b.closest(".gd-step");
           if (step) step.classList.toggle("checked", b.checked);
         });
-        var pct = iosTotal ? Math.round((done / iosTotal) * 100) : 0;
-        iosCount.textContent = done + " / " + iosTotal;
-        iosFill.style.width = pct + "%";
-        iosDone.classList.toggle("show", done === iosTotal && iosTotal > 0);
+        var pct = total ? Math.round((done / total) * 100) : 0;
+        countEl.textContent = done + " / " + total;
+        fillEl.style.width = pct + "%";
+        doneEl.classList.toggle("show", done === total && total > 0);
         if (done > 0) {
-          iosMiniBar.classList.add("on");
-          iosMiniFill.style.width = pct + "%";
-          iosCardMeta.textContent = done + " / " + iosTotal + " steps · " + pct + "%";
+          miniBar.classList.add("on");
+          miniFill.style.width = pct + "%";
+          cardMeta.textContent = done + " / " + total + " steps · " + pct + "%";
         } else {
-          iosMiniBar.classList.remove("on");
-          iosCardMeta.textContent = "6 steps · ~24 hours";
+          miniBar.classList.remove("on");
+          cardMeta.textContent = opts.defaultMeta;
         }
       }
 
-      iosBoxes.forEach(function (b) {
-        b.checked = !!iosState[b.getAttribute("data-ios")];
+      boxes.forEach(function (b) {
+        b.checked = !!state[b.getAttribute(opts.attr)];
         b.addEventListener("change", function () {
-          iosState[b.getAttribute("data-ios")] = b.checked;
-          iosSave();
-          iosRender();
+          state[b.getAttribute(opts.attr)] = b.checked;
+          save();
+          render();
         });
       });
 
-      document.getElementById("ios-reset").addEventListener("click", function () {
-        iosState = {};
-        iosSave();
-        iosBoxes.forEach(function (b) { b.checked = false; });
-        iosRender();
+      document.getElementById(opts.resetId).addEventListener("click", function () {
+        state = {};
+        save();
+        boxes.forEach(function (b) { b.checked = false; });
+        render();
       });
 
-      iosRender();
-    })();
+      render();
+    }
+
+    initGuide({
+      attr: "data-ios", storeKey: "ios-launch-checklist-v1", defaultMeta: "6 steps · ~24 hours",
+      countId: "ios-count", fillId: "ios-fill", doneId: "ios-done",
+      miniBarId: "ios-mini-bar", miniFillId: "ios-mini-fill", metaId: "ios-card-meta", resetId: "ios-reset"
+    });
+
+    initGuide({
+      attr: "data-dash", storeKey: "dashboard-workflow-v1", defaultMeta: "3 steps · ~10 min",
+      countId: "dash-count", fillId: "dash-fill", doneId: "dash-done",
+      miniBarId: "dash-mini-bar", miniFillId: "dash-mini-fill", metaId: "dash-card-meta", resetId: "dash-reset"
+    });
 
     /* ===== Card <-> detail navigation ===== */
     var hub = document.getElementById("cl-hub");
-    var views = { saas: document.getElementById("view-saas"), ios: document.getElementById("view-ios") };
+    var views = { saas: document.getElementById("view-saas"), ios: document.getElementById("view-ios"), mobile: document.getElementById("view-mobile"), dash: document.getElementById("view-dash") };
 
     function show(which) {
-      var valid = which === "saas" || which === "ios";
+      var valid = views.hasOwnProperty(which);
       hub.style.display = valid ? "none" : "";
       Object.keys(views).forEach(function (k) {
         views[k].classList.toggle("show", valid && k === which);
@@ -702,10 +990,79 @@
 
     function route() {
       var h = (location.hash || "").replace("#", "");
-      show(h === "saas" || h === "ios" ? h : null);
+      show(views.hasOwnProperty(h) ? h : null);
     }
     window.addEventListener("hashchange", route);
     route();
+  })();
+  </script>
+
+  <!-- ===== Premium resources: buy flow ===== -->
+  <style>
+    .cl-res { margin-top: 46px; }
+    .cl-res-title { font-size: 26px; font-weight: 900; letter-spacing: -.6px; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+    .cl-res-price { font-size: 14px; font-weight: 800; color: #c084fc; }
+    .cl-res-sub { color: var(--muted); font-size: 15px; margin: 6px 0 18px; }
+    .cl-rcard { text-align: left; cursor: pointer; border: 1px solid var(--border); border-radius: 18px; background: rgba(20,20,23,.72);
+      padding: 22px; display: flex; flex-direction: column; gap: 8px; color: var(--text);
+      transition: transform .18s, border-color .25s, box-shadow .25s; }
+    .cl-rcard:hover { transform: translateY(-4px); border-color: #c084fc; box-shadow: 0 22px 54px -26px rgba(192,132,252,.5); }
+    .cl-rfmt { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: #c084fc; }
+    .cl-rtitle { font-size: 19px; font-weight: 800; letter-spacing: -.3px; }
+    .cl-rdesc { color: var(--muted); font-size: 14px; line-height: 1.55; flex: 1; }
+    .cl-rfoot { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+    .cl-rprice { font-size: 20px; font-weight: 900; }
+    .cl-rbuy { font-size: 13px; font-weight: 800; color: #c084fc; }
+    .cl-modal { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px;
+      background: rgba(0,0,0,.62); backdrop-filter: blur(4px); }
+    .cl-modal.open { display: flex; }
+    .cl-modal-card { position: relative; width: 100%; max-width: 460px; background: #0f0f13; border: 1px solid var(--border); border-radius: 20px; padding: 28px; }
+    .cl-modal-x { position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+      background: #17171c; border: 1px solid var(--border); color: var(--text); font-size: 15px; }
+    .cl-modal-title { font-size: 21px; font-weight: 900; letter-spacing: -.4px; padding-right: 30px; }
+    .cl-modal-desc { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 8px 0 18px; }
+  </style>
+
+  <div class="cl-modal" id="cl-modal" aria-hidden="true">
+    <div class="cl-modal-card">
+      <button class="cl-modal-x" id="cl-modal-close" aria-label="Close">✕</button>
+      <div id="cl-modal-body"></div>
+    </div>
+  </div>
+
+  <script src="/static/buy.js?v=20260707"></script>
+  <script>
+  (async function () {
+    var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]); }); };
+    await EYN.loadConfig();
+    var wrap = document.getElementById('cl-res-wrap');
+    var grid = document.getElementById('cl-resources');
+    var items = [];
+    try { items = ((await (await fetch('/api/resources?page=checklist')).json()).resources) || []; } catch (e) {}
+    if (!items.length) return;               // nothing published for this page yet
+    wrap.style.display = '';
+    grid.innerHTML = items.map(function (r, i) {
+      var p = EYN.priceFor(r);
+      return '<button class="cl-rcard" data-i="' + i + '" type="button">' +
+        '<div class="cl-rfmt">' + esc(r.fmt) + '</div>' +
+        '<div class="cl-rtitle">' + esc(r.title) + '</div>' +
+        '<div class="cl-rdesc">' + esc(r.desc || '') + '</div>' +
+        '<div class="cl-rfoot"><span class="cl-rprice">' + p.label + '</span><span class="cl-rbuy">Buy &amp; download →</span></div>' +
+        '</button>';
+    }).join('');
+    var modal = document.getElementById('cl-modal');
+    var body = document.getElementById('cl-modal-body');
+    grid.querySelectorAll('.cl-rcard').forEach(function (card) {
+      card.addEventListener('click', function () {
+        var r = items[+card.dataset.i];
+        body.innerHTML = '<h3 class="cl-modal-title">' + esc(r.title) + '</h3>' +
+          '<p class="cl-modal-desc">' + esc(r.desc || '') + '</p><div id="cl-buybox"></div>';
+        EYN.mountBuyBox(document.getElementById('cl-buybox'), r);
+        modal.classList.add('open');
+      });
+    });
+    document.getElementById('cl-modal-close').addEventListener('click', function () { modal.classList.remove('open'); });
+    modal.addEventListener('click', function (e) { if (e.target === modal) modal.classList.remove('open'); });
   })();
   </script>
 </body>

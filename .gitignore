@@ -31,3 +31,8 @@ library/
 
 # Materialised free download files (deployed to Firebase, not git)
 library-files/
+
+# Local admin store / uploads (live on the Cloud Run volume in prod)
+resources.json
+uploads/
+shop.db

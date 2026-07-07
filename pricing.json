@@ -1,0 +1,6 @@
+{
+  "_comment": "Per-file price overrides. Any file NOT listed here is automatically paid at the region default (₹99 INR / $4 USD), so new files need no setup. To make a file free, add its slug to \"free\". To set a custom price, add it under \"INR\"/\"USD\".",
+  "free": [],
+  "INR": {},
+  "USD": {}
+}

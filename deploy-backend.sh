@@ -49,8 +49,21 @@ gcloud storage buckets describe "gs://$BUCKET" >/dev/null 2>&1 \
 # --- 3. Razorpay wiring (optional — deploy works without it; payments off) ----
 # All env vars go in ONE --update-env-vars string (repeating the flag makes gcloud
 # keep only the last one). The secret is injected separately via --set-secrets.
-ENV_VARS="SECURE_COOKIES=1,DB_PATH=/data/users.db,LIBRARY_DIR=/app/library,TRUST_PROXY=1"
+# No accounts/cookies anymore; DB (orders+grants) + admin uploads live on the mounted
+# GCS volume so download links and uploaded files survive restarts. SITE_URL builds
+# the links in emails.
+ENV_VARS="DB_PATH=/data/shop.db,LIBFILES_DIR=/app/library-files,UPLOAD_DIR=/data/uploads,RESOURCES_PATH=/data/resources.json,TRUST_PROXY=1,SITE_URL=https://resource-arjusingh.web.app"
 PAY_FLAGS=()
+
+# Admin panel (optional). Export ADMIN_PASSWORD before running to enable /admin.html.
+# ADMIN_SECRET signs admin sessions; a stable value keeps you logged in across restarts.
+if [[ -n "${ADMIN_PASSWORD:-}" ]]; then
+  ADMIN_SECRET_VAL="${ADMIN_SECRET:-$(openssl rand -hex 32 2>/dev/null || echo "eyn-admin-secret")}"
+  ENV_VARS="${ENV_VARS},ADMIN_PASSWORD=${ADMIN_PASSWORD},ADMIN_SECRET=${ADMIN_SECRET_VAL}"
+  echo "▶ Admin panel: ON (/admin.html)"
+else
+  echo "▶ Admin panel: OFF (export ADMIN_PASSWORD before running to enable /admin.html)"
+fi
 if gcloud secrets describe "$SECRET_NAME" >/dev/null 2>&1; then
   if [[ -z "${RAZORPAY_KEY_ID:-}" ]]; then
     echo "✋ Secret '$SECRET_NAME' exists but RAZORPAY_KEY_ID (public key id) isn't set."
@@ -62,22 +75,37 @@ if gcloud secrets describe "$SECRET_NAME" >/dev/null 2>&1; then
   RUNTIME_SA="${PNUM}-compute@developer.gserviceaccount.com"
   gcloud secrets add-iam-policy-binding "$SECRET_NAME" \
     --member="serviceAccount:${RUNTIME_SA}" --role="roles/secretmanager.secretAccessor" >/dev/null
-  ENV_VARS="${ENV_VARS},RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID},CURRENCY=INR"
+  ENV_VARS="${ENV_VARS},RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}"
   PAY_FLAGS+=(--set-secrets "RAZORPAY_KEY_SECRET=${SECRET_NAME}:latest")
   echo "▶ Payments: ON (key ${RAZORPAY_KEY_ID}, secret from Secret Manager)"
 else
-  echo "▶ Payments: OFF (no '$SECRET_NAME' secret yet — auth + free downloads still work)."
+  echo "▶ Payments: OFF (no '$SECRET_NAME' secret yet — pages still serve; buy button says 'not live')."
   echo "  Add it later per DEPLOY.md and re-run to enable paid downloads."
+fi
+
+# --- 3b. Email delivery (optional — SendGrid, for the download-link emails) ----
+# Create the secret once:  printf %s "SG.xxx" | gcloud secrets create sendgrid-api-key --data-file=-
+if gcloud secrets describe "sendgrid-api-key" >/dev/null 2>&1; then
+  PNUM="${PNUM:-$(gcloud projects describe "$PROJECT" --format='value(projectNumber)')}"
+  RUNTIME_SA="${PNUM}-compute@developer.gserviceaccount.com"
+  gcloud secrets add-iam-policy-binding "sendgrid-api-key" \
+    --member="serviceAccount:${RUNTIME_SA}" --role="roles/secretmanager.secretAccessor" >/dev/null
+  ENV_VARS="${ENV_VARS},MAIL_FROM=Everything You Need <connect@arjusingh.com>"
+  PAY_FLAGS+=(--set-secrets "SENDGRID_API_KEY=sendgrid-api-key:latest")
+  echo "▶ Email: ON (download links sent via SendGrid)"
+else
+  echo "▶ Email: OFF (no 'sendgrid-api-key' secret — link is shown on-screen after payment instead)."
 fi
 
 # --- 4. Build context: materialise the library symlinks into real files -------
 echo "▶ Staging build context…"
-mkdir -p "$STAGE/library"
+mkdir -p "$STAGE/library-files"
 cp "$ROOT"/server.py "$ROOT"/Dockerfile "$ROOT"/.gcloudignore "$ROOT"/pricing.json "$STAGE"/
 cp "$ROOT"/*.html "$ROOT"/robots.txt "$ROOT"/sitemap.xml "$STAGE"/ 2>/dev/null || true
 cp -R "$ROOT"/static "$STAGE"/static
-cp -RL "$ROOT"/library/. "$STAGE"/library/    # -L = follow symlinks → real PDFs
-echo "  staged $(find "$STAGE/library" -type f | wc -l | tr -d ' ') files ($(du -sh "$STAGE/library" | cut -f1))"
+# The paid, slug-named files the /dl gate serves. These are real files (no symlinks).
+cp -RL "$ROOT"/library-files/. "$STAGE"/library-files/
+echo "  staged $(find "$STAGE/library-files" -type f | wc -l | tr -d ' ') files ($(du -sh "$STAGE/library-files" | cut -f1))"
 
 # --- 5. Deploy to Cloud Run (Cloud Build builds the image — no local Docker) --
 echo "▶ Deploying to Cloud Run…"

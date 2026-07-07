@@ -13,8 +13,10 @@
       "DEPLOY.md",
       "*.db",
       "users.db",
+      "pricing.json",
       "rom/**",
       "library/**",
+      "library-files/**",
       "*.log",
       "package*.json",
       "README.md"
@@ -22,10 +24,8 @@
     "cleanUrls": false,
     "trailingSlash": false,
     "rewrites": [
-      { "source": "/api/**",   "run": { "serviceId": "eyn-backend", "region": "us-central1" } },
-      { "source": "/libdl",    "run": { "serviceId": "eyn-backend", "region": "us-central1" } },
-      { "source": "/libdl/**", "run": { "serviceId": "eyn-backend", "region": "us-central1" } },
-      { "source": "/download", "run": { "serviceId": "eyn-backend", "region": "us-central1" } }
+      { "source": "/api/**", "run": { "serviceId": "eyn-backend", "region": "us-central1" } },
+      { "source": "/dl",     "run": { "serviceId": "eyn-backend", "region": "us-central1" } }
     ],
     "headers": [
       {

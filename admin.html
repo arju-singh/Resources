@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Everything You Need</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/static/styles.css">
+<style>
+  .wrap { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-size: 30px; font-weight: 900; letter-spacing: -1px; }
+  .sub { color: var(--muted); margin-top: 6px; }
+  .card { border: 1px solid var(--border); border-radius: 18px; background: rgba(20,20,23,.7);
+    backdrop-filter: blur(8px); padding: 26px; margin-top: 22px; }
+  label { display: block; font-size: 13px; font-weight: 700; color: var(--muted); margin: 14px 0 6px; letter-spacing: .3px; }
+  input, textarea, select { width: 100%; background: var(--panel2, #17171c); border: 1px solid var(--border);
+    border-radius: 11px; padding: 12px 14px; color: var(--text); font-size: 15px; font-family: inherit; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: #a855f7; }
+  textarea { min-height: 74px; resize: vertical; }
+  .row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .row > div { flex: 1; min-width: 150px; }
+  .btn { cursor: pointer; border: none; font-family: inherit; font-weight: 800; font-size: 15px;
+    color: #fff; background: var(--btn, linear-gradient(90deg,#a855f7,#ec4899)); padding: 14px 20px; border-radius: 12px; margin-top: 20px; }
+  .btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn:disabled { opacity: .55; cursor: default; }
+  .msg { margin-top: 14px; font-size: 14px; font-weight: 600; min-height: 1.1em; color: var(--muted); }
+  .msg.err { color: #fca5a5; } .msg.ok { color: #4ade80; }
+  .res { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .res:last-child { border-bottom: none; }
+  .res .meta { flex: 1; min-width: 0; }
+  .res .t { font-weight: 700; font-size: 15px; }
+  .res .d { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  .res .price { color: #c084fc; font-weight: 800; font-size: 14px; white-space: nowrap; }
+  .res .del { cursor: pointer; background: transparent; border: 1px solid var(--border); color: #fca5a5;
+    border-radius: 9px; padding: 7px 12px; font-size: 13px; font-weight: 700; }
+  .hide { display: none !important; }
+  .pill { display:inline-block; font-size:11px; font-weight:800; letter-spacing:.5px; text-transform:uppercase;
+    background:rgba(192,132,252,.14); color:#d6bcff; border:1px solid rgba(192,132,252,.3); padding:3px 9px; border-radius:7px; }
+</style>
+</head>
+<body>
+  <nav>
+    <a class="brand" href="/"><span class="bolt">⚡</span> Everything You Need</a>
+    <div class="nav-links">
+      <a href="/library.html">Library</a>
+      <a href="/checklist.html">Checklist</a>
+      <span id="nav-auth"></span>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <h1>Admin</h1>
+    <div class="sub">Upload files to the site and set their price. New files go live instantly.</div>
+
+    <!-- disabled notice -->
+    <div class="card hide" id="disabled">
+      <b>Admin isn’t configured on the server.</b>
+      <p class="sub" style="margin-top:8px">Set an <code>ADMIN_PASSWORD</code> env var on the backend (Cloud Run) to enable this panel.</p>
+    </div>
+
+    <!-- login -->
+    <div class="card hide" id="login">
+      <label for="pw">Admin password</label>
+      <input type="password" id="pw" placeholder="••••••••" autocomplete="current-password">
+      <button class="btn" id="login-btn">Log in</button>
+      <div class="msg" id="login-msg"></div>
+    </div>
+
+    <!-- panel -->
+    <div id="panel" class="hide">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <b style="font-size:18px">Upload a file</b>
+          <button class="btn ghost" id="logout-btn" style="margin:0;padding:9px 16px;font-size:13px">Log out</button>
+        </div>
+        <label for="file">File (PDF, DOCX, Pages, XLSX, Notion export, image… any type · 40 MB max)</label>
+        <input type="file" id="file">
+        <label for="title">Title</label>
+        <input type="text" id="title" placeholder="e.g. Ultimate Launch Checklist">
+        <div class="row">
+          <div>
+            <label for="page">Show on page</label>
+            <select id="page">
+              <option value="library">Library</option>
+              <option value="checklist">Checklist</option>
+            </select>
+          </div>
+          <div>
+            <label for="cat">Category / tag</label>
+            <input type="text" id="cat" placeholder="e.g. Guides">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="price_inr">Price ₹ (INR)</label>
+            <input type="number" id="price_inr" min="0" step="1">
+          </div>
+          <div>
+            <label for="price_usd">Price $ (USD)</label>
+            <input type="number" id="price_usd" min="0" step="1">
+          </div>
+        </div>
+        <label for="desc">Short description</label>
+        <textarea id="desc" placeholder="One or two lines about this resource."></textarea>
+        <button class="btn" id="upload-btn">⬆ Upload &amp; publish</button>
+        <div class="msg" id="up-msg"></div>
+      </div>
+
+      <div class="card">
+        <b style="font-size:18px">Published files</b>
+        <div id="reslist" style="margin-top:14px"><div class="sub">Loading…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js?v=20260707"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+    let PAGE_PRICES = { library: { INR: 99, USD: 4 }, checklist: { INR: 199, USD: 10 } };
+
+    function show(id){ ['disabled','login','panel'].forEach(x => $(x).classList.toggle('hide', x !== id)); }
+
+    async function init(){
+      try {
+        const cfg = await (await fetch('/api/pay-config')).json();
+        if (cfg.page_prices) PAGE_PRICES = cfg.page_prices;
+      } catch(e){}
+      applyPageDefault();
+      let me;
+      try { me = await (await fetch('/api/admin/me')).json(); } catch(e){ me = {}; }
+      if (!me.enabled) return show('disabled');
+      if (me.admin) { show('panel'); loadResources(); } else { show('login'); }
+    }
+
+    function applyPageDefault(){
+      const p = PAGE_PRICES[$('page').value] || PAGE_PRICES.library;
+      $('price_inr').value = p.INR; $('price_usd').value = p.USD;
+    }
+    $('page').addEventListener('change', applyPageDefault);
+
+    $('login-btn').addEventListener('click', login);
+    $('pw').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+    async function login(){
+      const msg = $('login-msg'); msg.textContent = 'Checking…'; msg.className = 'msg';
+      try {
+        const r = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ password: $('pw').value }) });
+        const d = await r.json();
+        if (r.ok) { $('pw').value=''; show('panel'); loadResources(); }
+        else { msg.textContent = d.error || 'Login failed.'; msg.className = 'msg err'; }
+      } catch(e){ msg.textContent = 'Network error.'; msg.className = 'msg err'; }
+    }
+
+    $('logout-btn').addEventListener('click', async () => {
+      try { await fetch('/api/admin/logout', { method:'POST' }); } catch(e){}
+      show('login');
+    });
+
+    function readAsBase64(file){
+      return new Promise((resolve, reject) => {
+        const fr = new FileReader();
+        fr.onload = () => resolve(String(fr.result).split(',').pop());
+        fr.onerror = reject;
+        fr.readAsDataURL(file);
+      });
+    }
+
+    $('upload-btn').addEventListener('click', upload);
+    async function upload(){
+      const msg = $('up-msg'); const btn = $('upload-btn');
+      const file = $('file').files[0];
+      const title = $('title').value.trim();
+      if (!file) { msg.textContent = 'Choose a file first.'; msg.className='msg err'; return; }
+      if (!title) { msg.textContent = 'Give it a title.'; msg.className='msg err'; return; }
+      if (file.size > 40*1024*1024) { msg.textContent = 'File is over 40 MB.'; msg.className='msg err'; return; }
+      btn.disabled = true; msg.textContent = 'Uploading…'; msg.className = 'msg';
+      try {
+        const data = await readAsBase64(file);
+        const r = await fetch('/api/admin/upload', { method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            title, filename: file.name, page: $('page').value, cat: $('cat').value.trim(),
+            desc: $('desc').value.trim(), price_inr: $('price_inr').value, price_usd: $('price_usd').value, data
+          }) });
+        const d = await r.json();
+        if (r.ok) {
+          msg.textContent = '✓ Published “' + d.resource.title + '”.'; msg.className = 'msg ok';
+          $('file').value=''; $('title').value=''; $('cat').value=''; $('desc').value='';
+          loadResources();
+        } else { msg.textContent = d.error || 'Upload failed.'; msg.className = 'msg err'; }
+      } catch(e){ msg.textContent = 'Upload error: ' + e.message; msg.className = 'msg err'; }
+      btn.disabled = false;
+    }
+
+    async function loadResources(){
+      const box = $('reslist');
+      try {
+        const d = await (await fetch('/api/admin/resources')).json();
+        const items = d.resources || [];
+        if (!items.length) { box.innerHTML = '<div class="sub">No uploads yet.</div>'; return; }
+        box.innerHTML = items.slice().reverse().map(r => `
+          <div class="res">
+            <div class="meta">
+              <div class="t">${esc(r.title)} <span class="pill">${esc(r.page)}</span></div>
+              <div class="d">${esc(r.fmt)} · ${(r.size/1024).toFixed(0)} KB · ${esc(r.cat||'')}</div>
+            </div>
+            <div class="price">₹${r.price_inr} · $${r.price_usd}</div>
+            <button class="del" data-slug="${esc(r.slug)}">Delete</button>
+          </div>`).join('');
+        box.querySelectorAll('.del').forEach(b => b.addEventListener('click', () => del(b.dataset.slug)));
+      } catch(e){ box.innerHTML = '<div class="msg err">Couldn’t load list.</div>'; }
+    }
+
+    async function del(slug){
+      if (!confirm('Delete this file? Buyers with an active link may lose access.')) return;
+      try {
+        const r = await fetch('/api/admin/delete', { method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ slug }) });
+        if (r.ok) loadResources();
+      } catch(e){}
+    }
+
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    init();
+  </script>
+</body>
+</html>

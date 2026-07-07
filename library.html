@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Library — 60+ AI, Coding & Career Resources</title>
-<meta name="description" content="A curated, animated library of 60+ free AI, Claude, coding, design, and career resources. Sign in to download.">
+<title>The Library — 80+ AI, Coding & Career Resources</title>
+<meta name="description" content="A curated, animated library of 80+ free AI, Claude, coding, design, and career resources. No sign-up — every file downloads directly.">
 <link rel="stylesheet" href="/static/styles.css">
 <style>
   /* ===== Library page — premium animated theme ===== */
@@ -130,6 +130,23 @@
     background: var(--btn); padding:15px; border-radius:14px; font-weight:800; font-size:16px; transition:.2s; box-shadow:0 10px 30px -8px rgba(236,72,153,.55); }
   .rdl:hover { transform: translateY(-2px); box-shadow:0 16px 40px -10px rgba(236,72,153,.7); }
   .rdl.locked { background: rgba(255,255,255,.04); border:1px solid var(--border); box-shadow:none; }
+  /* Buy flow */
+  .rbuy, .rsuccess { flex:1 1 100%; display:flex; flex-direction:column; gap:12px; }
+  .rprice { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .rprice .rp-main { font-size:26px; font-weight:900; color:var(--text); letter-spacing:-.5px; }
+  .rprice .rp-alt { color:var(--muted); font-size:13px; font-weight:600; }
+  .rbuy-email { width:100%; background:var(--panel2); border:1px solid var(--border); border-radius:12px;
+    padding:14px 16px; color:var(--text); font-size:15px; font-family:inherit; }
+  .rbuy-email::placeholder { color:var(--muted); }
+  .rbuy-email:focus { outline:none; border-color:#a855f7; }
+  .rbuy .rdl, .rsuccess .rdl { width:100%; cursor:pointer; border:none; font-family:inherit; }
+  .rbuy-note { color:var(--muted); font-size:12.5px; line-height:1.5; }
+  .rbuy-msg { font-size:13.5px; font-weight:600; min-height:1.1em; color:var(--muted); }
+  .rbuy-msg.err { color:#fca5a5; }
+  .rsuccess .rs-check { font-size:20px; font-weight:900; color:#4ade80; }
+  .rsuccess p { color:var(--muted); font-size:14.5px; line-height:1.6; }
+  .rsuccess .rs-warn { color:#fbbf24; }
+  .vprice { color:#c084fc; font-weight:800; }
   .rcopy { display:flex; align-items:center; justify-content:center; gap:9px; text-decoration:none; cursor:pointer;
     background: transparent; color: var(--text); border:1px solid var(--border); padding:15px 22px; border-radius:14px; font-weight:700; font-size:15px; transition:.2s; }
   .rcopy:hover { border-color:#a855f7; }
@@ -153,22 +170,24 @@
 
   <nav>
     <a class="brand" href="/"><span class="bolt">⚡</span> Everything You Need</a>
-    <div class="nav-links">
+        <div class="nav-links">
       <a href="/free-llm-apis.html">Free LLM APIs</a>
       <a href="/library.html" class="active">Library</a>
       <a href="/links.html">Links</a>
+      <a href="/checklist.html">Checklist</a>
+      <a href="/userpain.html">User Pain</a>
       <span id="nav-auth"></span>
     </div>
   </nav>
 
   <header class="lib-hero">
-    <span class="eyebrow-pill kicker">📚 The Vault · Curated &amp; Free</span>
+    <span class="eyebrow-pill kicker">📚 The Vault · Curated · ₹99 / $4 each</span>
     <h1>The <span class="g">Library</span></h1>
-    <p>A hand-curated vault of AI, Claude, coding, design &amp; career resources — guides, prompt packs, roadmaps, and cheat sheets. <b id="gate-note">Every resource is free to download — no sign-up needed.</b></p>
+    <p>A hand-curated vault of AI, Claude, coding, design &amp; career resources — guides, prompt packs, roadmaps, and cheat sheets. <b id="gate-note">Each resource is ₹99 in India · $4 international — pay once, we email your download link.</b></p>
     <div class="stats">
       <div class="stat"><div class="num" data-count="0" id="stat-files">0</div><div class="lbl">Resources</div></div>
       <div class="stat"><div class="num" data-count="0" id="stat-cats">0</div><div class="lbl">Categories</div></div>
-      <div class="stat"><div class="num" id="stat-free">100%</div><div class="lbl">Free Access</div></div>
+      <div class="stat"><div class="num" id="stat-free">₹99</div><div class="lbl">Per File · $4 Intl</div></div>
     </div>
   </header>
 
@@ -205,8 +224,8 @@
     <div class="bottom">© 2026 AI Tools. All rights reserved.</div>
   </footer>
 
-  <script src="/static/app.js"></script>
-  <script src="/static/library-data.js"></script>
+  <script src="/static/app.js?v=20260707"></script>
+  <script src="/static/library-data.js?v=20260707"></script>
 
   <!-- Three.js animated background + Motion-driven UI -->
   <script type="module">
@@ -219,17 +238,9 @@
     let DATA = window.LIBRARY || [];
     let CATS = window.LIBRARY_CATS || [];
 
-    // Drop any resource whose underlying file was physically deleted from /library
-    async function pruneDeleted(){
-      try {
-        const r = await fetch('/api/library-files');
-        if (!r.ok) return;
-        const { files } = await r.json();
-        const live = new Set(files);
-        DATA = DATA.filter(d => live.has(d.file));
-        CATS = CATS.filter(c => DATA.some(d => d.cat === c));
-      } catch { /* offline: keep static list */ }
-    }
+    // The static data file (static/library-data.js) is the single source of
+    // truth. It's reconciled against the deployed files at publish time by
+    // sync-library.sh, so there's no backend list to fetch at runtime.
 
     /* ---------- THREE.JS BACKGROUND ---------- */
     (async function bg(){
@@ -320,11 +331,113 @@
     const fmtSize = b => b < 1024 ? b+' B' : b < 1048576 ? (b/1024).toFixed(0)+' KB' : (b/1048576).toFixed(1)+' MB';
     const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
+    /* ---------- Payments ---------- */
+    // Server is the source of truth; these are display fallbacks until pay-config loads.
+    const PAY = { configured: false, key_id: '', prices: { INR: 99, USD: 4 }, ttl_days: 30, max_downloads: 10 };
+    // Region default: India → INR, everyone else → USD. The buyer's charge is still
+    // server-authoritative; this only picks which currency to show/charge by default.
+    const CUR = (() => {
+      try {
+        const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
+        if (/Calcutta|Kolkata/i.test(tz)) return 'INR';
+        if (/-IN$/i.test(navigator.language || '')) return 'INR';
+      } catch (e) {}
+      return 'USD';
+    })();
+    const money = (cur, amt) => cur === 'INR' ? `₹${amt}` : `$${amt}`;
+    // Per-resource price when set (admin uploads can carry custom prices), else page default.
+    const resPrice = (d, cur) => {
+      const k = cur === 'INR' ? 'price_inr' : 'price_usd';
+      return (d && d[k] != null) ? d[k] : PAY.prices[cur];
+    };
+    const priceLabel = (d) => money(CUR, resPrice(d, CUR));
+    const priceMain  = (d) => priceLabel(d);
+    const priceAlt   = (d) => CUR === 'INR' ? `or ${money('USD', resPrice(d, 'USD'))} international`
+                                            : `or ${money('INR', resPrice(d, 'INR'))} in India`;
+
+    async function loadPayConfig(){
+      try {
+        const r = await fetch('/api/pay-config');
+        if (r.ok) { const c = await r.json(); Object.assign(PAY, c); }
+      } catch (e) { /* backend not reachable — buy flow will explain on click */ }
+    }
+
+    function loadRazorpay(){
+      return new Promise((resolve, reject) => {
+        if (window.Razorpay) return resolve();
+        const s = document.createElement('script');
+        s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        s.onload = resolve; s.onerror = () => reject(new Error('checkout'));
+        document.head.appendChild(s);
+      });
+    }
+
+    const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+    async function buyResource(d){
+      const btn = document.getElementById('rbuy-btn');
+      const msg = document.getElementById('rbuy-msg');
+      const emailEl = document.getElementById('rbuy-email');
+      const setMsg = (t, kind='') => { if (msg){ msg.textContent = t; msg.className = 'rbuy-msg ' + kind; } };
+      const email = (emailEl && emailEl.value || '').trim().toLowerCase();
+      if (!EMAIL_RE.test(email)) { setMsg('Enter a valid email so we can send your download link.', 'err'); emailEl && emailEl.focus(); return; }
+      if (!PAY.configured) { setMsg('Payments aren’t live yet — check back shortly.', 'err'); return; }
+      btn.disabled = true; setMsg('Starting secure checkout…');
+      try {
+        await loadRazorpay();
+        const r = await fetch('/api/create-order', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ file: d.slug, name: d.file, email, currency: CUR })
+        });
+        const o = await r.json();
+        if (!r.ok) { setMsg(o.error || 'Couldn’t start checkout.', 'err'); btn.disabled = false; return; }
+        const rzp = new Razorpay({
+          key: o.key_id, order_id: o.order_id, amount: o.amount, currency: o.currency,
+          name: 'Everything You Need', description: d.title, prefill: { email },
+          theme: { color: '#a855f7' },
+          handler: async (resp) => {
+            setMsg('Verifying payment…');
+            try {
+              const v = await fetch('/api/verify-payment', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  razorpay_order_id: resp.razorpay_order_id,
+                  razorpay_payment_id: resp.razorpay_payment_id,
+                  razorpay_signature: resp.razorpay_signature
+                })
+              });
+              const vd = await v.json();
+              if (vd.ok) { showPurchaseSuccess(vd); }
+              else { setMsg(vd.error || 'Verification failed. If you were charged, email connect@arjusingh.com.', 'err'); btn.disabled = false; }
+            } catch (e) { setMsg('Verification error. If charged, email connect@arjusingh.com with your payment id.', 'err'); btn.disabled = false; }
+          },
+          modal: { ondismiss: () => { setMsg('Checkout closed — you were not charged.'); btn.disabled = false; } }
+        });
+        rzp.on('payment.failed', (e) => { setMsg((e.error && e.error.description) || 'Payment failed. Please try again.', 'err'); btn.disabled = false; });
+        rzp.open();
+      } catch (e) {
+        setMsg('Couldn’t load the payment window. Check your connection and retry.', 'err');
+        btn.disabled = false;
+      }
+    }
+
+    function showPurchaseSuccess(vd){
+      const box = document.getElementById('rbuy');
+      if (!box) return;
+      box.innerHTML = `
+        <div class="rsuccess">
+          <div class="rs-check">✅ Payment successful</div>
+          <p>Your download link is on its way to <b>${esc(vd.email || '')}</b>${vd.emailed ? '' : ' <span class="rs-warn">(if it doesn’t arrive, use the button below)</span>'}.</p>
+          <a class="rdl" href="${esc(vd.download_url)}">⬇ Download now</a>
+          <div class="rbuy-note">This link works for ${vd.expires_days} days and up to ${vd.max_downloads} downloads — keep the email to re-download.</div>
+        </div>`;
+    }
+
     // Build chips
     function buildChips(){
       const counts = {}; DATA.forEach(d => counts[d.cat]=(counts[d.cat]||0)+1);
       const featCount = DATA.filter(d => d.feat).length;
-      const all = [['All', DATA.length], ...(featCount?[['★ Featured', featCount]]:[]), ...CATS.map(c => [c, counts[c]||0])];
+      const all = [['All', DATA.length], ...(featCount?[['★ Featured', featCount]]:[]), ...CATS.filter(c => (counts[c]||0) > 0).map(c => [c, counts[c]])];
       chipsEl.innerHTML = all.map(([c,n]) =>
         `<button class="chip ${c==='All'?'active':''}" data-cat="${esc(c)}">${esc(c)}<span class="c">${n}</span></button>`).join('');
       chipsEl.querySelectorAll('.chip').forEach(ch => ch.addEventListener('click', () => {
@@ -342,7 +455,18 @@
     // Everything is free — direct download of the static file. `download` sets the
     // saved filename to the original nice name (the URL uses a safe slug).
     function modalActions(d){
-      return `<a class="rdl" id="rdl" href="/library-files/${encodeURIComponent(d.slug)}" download="${esc(d.file)}">⬇ Download Free</a>`;
+      return `
+        <div class="rbuy" id="rbuy">
+          <div class="rprice">
+            <span class="rp-main">${priceMain(d)}</span>
+            <span class="rp-alt">${priceAlt(d)}</span>
+          </div>
+          <input class="rbuy-email" id="rbuy-email" type="email" inputmode="email" autocomplete="email"
+                 placeholder="Email — we’ll send your download link here">
+          <button class="rdl" id="rbuy-btn">🔒 Buy &amp; Download · <span id="rbuy-price">${priceLabel(d)}</span></button>
+          <div class="rbuy-note">Instant, secure download link · re-download for ${PAY.ttl_days} days.</div>
+          <div class="rbuy-msg" id="rbuy-msg" role="status"></div>
+        </div>`;
     }
 
     function openModal(d){
@@ -352,7 +476,7 @@
         <div class="rbanner has-img" style="background:${d.grad}">
           <img src="${hasImg}" alt="" onerror="this.remove(); this.parentElement.classList.remove('has-img');">
           <span class="ricon">${d.icon}</span>
-          <span class="rfree">${d.feat ? '★ Featured' : 'Free'}</span>
+          <span class="rfree">${d.feat ? '★ Featured' : priceLabel(d)}</span>
           <span class="rfmt">${d.fmt}</span>
         </div>
         <div class="rbody">
@@ -378,6 +502,11 @@
         copyBtn.textContent = '✓ Copied!';
         setTimeout(()=>{ copyBtn.textContent = '🔗 Copy Link'; }, 1600);
       });
+      // buy & download
+      const buyBtn = document.getElementById('rbuy-btn');
+      if (buyBtn) buyBtn.addEventListener('click', () => buyResource(d));
+      const emailInp = document.getElementById('rbuy-email');
+      if (emailInp) emailInp.addEventListener('keydown', e => { if (e.key === 'Enter') buyResource(d); });
       rmodal.classList.add('open');
       rclose.style.display = 'flex';
       rmodal.setAttribute('aria-hidden','false');
@@ -414,7 +543,7 @@
               <p class="vdesc">${esc(d.desc)}</p>
               <div class="vtags">${d.tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>
               <div class="vmeta"><b>${d.dl.toLocaleString()}</b> downloads · ${fmtSize(d.size)}</div>
-              <div class="vmore">View &amp; download ↗</div>
+              <div class="vmore"><span class="vprice">${priceLabel(d)}</span> · View &amp; buy ↗</div>
             </div>
           </div>
         </article>`;
@@ -459,8 +588,29 @@
       animate(0, to, { duration:1.2, easing:'ease-out', onUpdate: v => el.textContent = Math.round(v) });
     }
 
+    // Pull in any files the admin uploaded to the Library page and add them to the grid.
+    async function mergeAdminResources(){
+      try {
+        const r = await fetch('/api/resources?page=library');
+        if (!r.ok) return;
+        const { resources } = await r.json();
+        (resources || []).forEach((x, idx) => {
+          DATA.push({
+            i: 900000 + idx, title: x.title, slug: x.slug, file: x.slug,
+            cat: x.cat || 'Other', desc: x.desc || '', fmt: x.fmt || 'FILE',
+            size: x.size || 0, dl: x.dl || 0, tags: x.fmt ? [x.fmt] : [],
+            grad: 'linear-gradient(135deg,#7c3aed,#db2777)', icon: '✨', feat: 0,
+            price_inr: x.price_inr, price_usd: x.price_usd
+          });
+          const c = x.cat || 'Other';
+          if (c && !CATS.includes(c)) CATS.push(c);
+        });
+      } catch (e) { /* backend not reachable — static library still works */ }
+    }
+
     async function boot(){
-      await pruneDeleted();
+      loadPayConfig();
+      await mergeAdminResources();
       buildChips();
       render();
       countUp(document.getElementById('stat-files'), DATA.length);
@@ -471,8 +621,6 @@
         animate('.lib-hero h1', { opacity:[0,1], transform:['translateY(20px)','translateY(0)'] }, { duration:.7, delay:.08 });
         animate('.lib-hero p', { opacity:[0,1], transform:['translateY(16px)','translateY(0)'] }, { duration:.7, delay:.16 });
       }
-      await AUTH.fetchMe();
-      render(); // reflect any nav/auth state
       // deep-link: open a resource if URL has #r-<index>
       const m = location.hash.match(/^#r-(\d+)$/);
       if (m) { const d = DATA.find(x => String(x.i) === m[1]); if (d) openModal(d); }

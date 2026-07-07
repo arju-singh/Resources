@@ -1,0 +1,86 @@
+# Render Blueprint — deploys the "Everything You Need" backend (server.py) as a
+# single web service that serves the whole site (pages + /api + /dl).
+#
+# HOW TO USE:
+#   1. Render dashboard → New → Blueprint → pick the arju-singh/Resources repo.
+#      Render reads THIS file and provisions the service + persistent disk.
+#   2. It will prompt for the "sync: false" values (secrets) — enter them in the
+#      dashboard so they never live in git. See sendgrid.yaml + DEPLOY notes.
+#   3. Put your 82 paid files on the disk once (they are gitignored on purpose so
+#      they stay private): open the service Shell/SSH and from your laptop run
+#         rsync -av ~/Downloads/Resource/library-files/  /data/library-files/
+#      (LIBFILES_DIR below points there.)
+#
+# NOTE: a paid plan ("starter"+) is required for the persistent disk — the free
+# tier has no disk and sleeps, which would drop orders + emailed download links.
+
+services:
+  - type: web
+    name: eyn-backend
+    runtime: python
+    plan: starter
+    region: singapore          # closest Render region to India; change if you prefer
+    branch: main
+    buildCommand: ""           # pure stdlib — nothing to install
+    startCommand: python3 server.py
+    healthCheckPath: /
+    autoDeploy: true
+
+    disk:
+      name: eyn-data           # persists SQLite (orders + download grants), admin
+      mountPath: /data         # uploads, and the library files across restarts
+      sizeGB: 1
+
+    envVars:
+      # --- Python runtime ---
+      - key: PYTHON_VERSION
+        value: "3.12.4"
+
+      # --- Storage paths (all on the persistent disk) ---
+      - key: DB_PATH
+        value: /data/shop.db
+      - key: UPLOAD_DIR
+        value: /data/uploads
+      - key: RESOURCES_PATH
+        value: /data/resources.json
+      - key: LIBFILES_DIR
+        value: /data/library-files
+      - key: TRUST_PROXY
+        value: "1"
+
+      # --- Pricing (region-based; edit anytime) ---
+      - key: PRICE_INR
+        value: "99"
+      - key: PRICE_USD
+        value: "4"
+      - key: CHECKLIST_PRICE_INR
+        value: "199"
+      - key: CHECKLIST_PRICE_USD
+        value: "10"
+
+      # --- Download-link policy ---
+      - key: GRANT_TTL_DAYS
+        value: "30"
+      - key: GRANT_MAX_DOWNLOADS
+        value: "10"
+
+      # --- Email "from" (must match a verified SendGrid sender — see sendgrid.yaml) ---
+      - key: MAIL_FROM
+        value: "Everything You Need <connect@arjusingh.com>"
+
+      # --- Signs admin sessions; Render generates a stable random value once ---
+      - key: ADMIN_SECRET
+        generateValue: true
+
+      # --- Secrets / per-account values → set these in the Render dashboard.
+      #     sync:false keeps them OUT of git. ---
+      - key: SITE_URL              # e.g. https://eyn-backend.onrender.com (or your domain)
+        sync: false
+      - key: RAZORPAY_KEY_ID       # rzp_live_...  (public, but kept with the pair)
+        sync: false
+      - key: RAZORPAY_KEY_SECRET   # your ROTATED Razorpay secret
+        sync: false
+      - key: ADMIN_PASSWORD        # your /admin.html login
+        sync: false
+      - key: SENDGRID_API_KEY      # SG.xxx — enables the download-link emails
+        sync: false

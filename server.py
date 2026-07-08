@@ -32,7 +32,7 @@ Optional:
     RESEND_API_KEY=re_xxx  MAIL_FROM="Everything You Need <connect@arjusingh.com>"
     SITE_URL=https://resource-arjusingh.web.app   (used to build the emailed link)
 """
-import os, re, json, time, hmac, base64, sqlite3, hashlib, secrets, threading, mimetypes, urllib.parse, urllib.request
+import os, re, json, time, hmac, html, base64, sqlite3, hashlib, secrets, threading, mimetypes, urllib.parse, urllib.request
 from collections import defaultdict, deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -298,10 +298,14 @@ def send_download_email(to_email, name, url, currency, amount):
     (caller still returns the link in the API response so nothing is lost)."""
     if not RESEND_API_KEY:
         return False
-    title = name or "your resource"
-    html = (
+    # `name` originates from the buyer's create-order request, so escape it before it
+    # goes into HTML (and use the raw form only for the plain-text subject line).
+    raw_title = name or "your resource"
+    title = html.escape(raw_title)
+    safe_url = html.escape(url, quote=True)
+    body_html = (
         f"<p>Thanks for your purchase! Here's your download for <b>{title}</b>.</p>"
-        f"<p><a href=\"{url}\">⬇ Download {title}</a></p>"
+        f"<p><a href=\"{safe_url}\">⬇ Download {title}</a></p>"
         f"<p>This link works for {GRANT_TTL_DAYS} days and up to {GRANT_MAX_DOWNLOADS} downloads. "
         f"Keep this email so you can re-download.</p>"
         f"<p style=\"color:#888;font-size:12px\">Everything You Need · by Arju Singh</p>"
@@ -309,8 +313,8 @@ def send_download_email(to_email, name, url, currency, amount):
     payload = json.dumps({
         "from": MAIL_FROM,               # Resend accepts a plain "Name <email>" string
         "to": [to_email],
-        "subject": f"Your download: {title}",
-        "html": html,
+        "subject": f"Your download: {raw_title[:120]}",
+        "html": body_html,
     }).encode()
     req = urllib.request.Request(
         "https://api.resend.com/emails", data=payload, method="POST",
@@ -367,6 +371,7 @@ LIM_GLOBAL   = (1200, 60)
 LIM_API      = (240, 60)
 LIM_DOWNLOAD = (120, 60)
 LIM_ORDER    = (20, 60)     # order creation is abuse-prone (hits Razorpay) — keep tight
+LIM_LOGIN    = (8, 60)      # admin password attempts — dedicated tight bucket vs brute force
 
 # ---------- HTTP handler ----------
 class Handler(BaseHTTPRequestHandler):
@@ -392,6 +397,9 @@ class Handler(BaseHTTPRequestHandler):
     def end_headers(self):
         for k, v in self.SECURITY_HEADERS.items():
             self.send_header(k, v)
+        # HSTS only on a real (non-local) host — where prod terminates HTTPS.
+        if self.cookie_secure():
+            self.send_header("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
         super().end_headers()
 
     def client_ip(self):
@@ -416,7 +424,7 @@ class Handler(BaseHTTPRequestHandler):
         return False
 
     def cookie_secure(self):
-        host = (self.headers.get("Host") or "").split(":")[0].lower()
+        host = ((self.headers.get("Host") if self.headers else "") or "").split(":")[0].lower()
         local = host in ("localhost", "127.0.0.1", "::1", "") or host.endswith(".local")
         return "" if local else "; Secure"
 
@@ -650,7 +658,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_json({"error": "Admin isn’t configured on this server."}, 503)
 
         if path == "/api/admin/login":
-            if self.rate_limited("order", ip, *LIM_ORDER):  # tight bucket to slow guessing
+            if self.rate_limited("login", ip, *LIM_LOGIN):  # dedicated tight bucket to slow guessing
                 return
             data = self.read_body()
             if data is None:

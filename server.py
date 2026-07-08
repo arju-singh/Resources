@@ -41,7 +41,10 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.environ.get("DB_PATH", os.path.join(ROOT, "shop.db"))
 # The paid files. Slug-named; served ONLY through the /dl grant gate — never publicly.
 LIBFILES_DIR = os.environ.get("LIBFILES_DIR", os.path.join(ROOT, "library-files"))
-STATIC_DIR = os.path.join(ROOT, "static")
+# The browser-served site (HTML pages, static assets, robots/sitemap) lives under
+# public/. Firebase Hosting serves the same folder as its web root.
+WEB_ROOT = os.path.join(ROOT, "public")
+STATIC_DIR = os.path.join(WEB_ROOT, "static")
 
 # ---------- Configuration (all via environment — no secrets in source) ----------
 PORT = int(os.environ.get("PORT", 3011))
@@ -547,14 +550,14 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send_error(403, "Forbidden")
             return self.serve_file(target)
 
-        # Pages
+        # Pages (served from the public/ web root)
         if path in ("/", ""):
-            return self.serve_file(os.path.join(ROOT, "index.html"))
+            return self.serve_file(os.path.join(WEB_ROOT, "index.html"))
         if path.endswith(".html"):
-            return self.serve_file(os.path.join(ROOT, os.path.basename(path)))
+            return self.serve_file(os.path.join(WEB_ROOT, os.path.basename(path)))
 
         safe_rel = os.path.basename(path.lstrip("/"))
-        target = os.path.join(ROOT, safe_rel)
+        target = os.path.join(WEB_ROOT, safe_rel)
         if safe_rel and not is_sensitive_filename(safe_rel) and os.path.isfile(target):
             return self.serve_file(target)
 

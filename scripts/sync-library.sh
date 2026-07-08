@@ -8,18 +8,18 @@
 #
 # To REMOVE a resource, do either one, then run this:
 #   • delete its file from  library/   (its symlink), OR
-#   • delete its entry from static/library-data.js
+#   • delete its entry from public/static/library-data.js
 #
 # Usage:
-#   ./sync-library.sh            # reconcile + deploy
-#   ./sync-library.sh --no-deploy  # reconcile only (preview locally)
+#   ./scripts/sync-library.sh              # reconcile + deploy  (run from repo root)
+#   ./scripts/sync-library.sh --no-deploy  # reconcile only (preview locally)
 # ---------------------------------------------------------------------------
 set -euo pipefail
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."   # repo root (script lives in scripts/)
 
 python3 - <<'PY'
 import re, json, os, shutil, unicodedata
-DATA = 'static/library-data.js'; LIBDIR = 'library'; OUT = 'library-files'
+DATA = 'public/static/library-data.js'; LIBDIR = 'library'; OUT = 'library-files'
 src = open(DATA, encoding='utf-8').read()
 arr  = json.loads(re.search(r'window\.LIBRARY\s*=\s*(\[.*?\]);', src, re.S).group(1))
 cats = re.search(r'window\.LIBRARY_CATS\s*=\s*(\[.*?\]);', src, re.S).group(1)

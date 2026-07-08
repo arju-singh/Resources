@@ -13,7 +13,7 @@
 #   export RAZORPAY_KEY_ID=rzp_live_xxxxxxxx          # the PUBLIC key id
 #   printf %s "$RAZORPAY_KEY_SECRET_VALUE" | \        # the rotated SECRET
 #     gcloud secrets create razorpay-key-secret --data-file=- --project resource-arjusingh
-#   ./deploy-backend.sh
+#   ./scripts/deploy-backend.sh            # run from the repo root
 # ===========================================================================
 set -euo pipefail
 
@@ -22,7 +22,8 @@ REGION="us-central1"
 SERVICE="eyn-backend"
 BUCKET="${PROJECT}-eyn-data"          # persistent SQLite DB
 SECRET_NAME="razorpay-key-secret"     # Secret Manager entry for the Razorpay secret
-ROOT="$(cd "$(dirname "$0")" && pwd)"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"   # repo root (script lives in scripts/)
+cd "$ROOT"                                  # firebase config paths resolve from here
 STAGE="$(mktemp -d)/eyn-build"
 
 echo "▶ Project $PROJECT · region $REGION · service $SERVICE"
@@ -99,10 +100,10 @@ fi
 
 # --- 4. Build context: materialise the library symlinks into real files -------
 echo "▶ Staging build context…"
-mkdir -p "$STAGE/library-files"
+mkdir -p "$STAGE/library-files" "$STAGE/public"
 cp "$ROOT"/server.py "$ROOT"/Dockerfile "$ROOT"/.gcloudignore "$ROOT"/pricing.json "$STAGE"/
-cp "$ROOT"/*.html "$ROOT"/robots.txt "$ROOT"/sitemap.xml "$STAGE"/ 2>/dev/null || true
-cp -R "$ROOT"/static "$STAGE"/static
+# The browser-served site (pages + static + robots/sitemap) lives under public/.
+cp -R "$ROOT"/public/. "$STAGE"/public/
 # The paid, slug-named files the /dl gate serves. These are real files (no symlinks).
 cp -RL "$ROOT"/library-files/. "$STAGE"/library-files/
 echo "  staged $(find "$STAGE/library-files" -type f | wc -l | tr -d ' ') files ($(du -sh "$STAGE/library-files" | cut -f1))"

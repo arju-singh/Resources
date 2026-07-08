@@ -33,7 +33,7 @@ trap 'rmdir "$LOCK" 2>/dev/null' EXIT
 sleep 5
 
 echo "$(date '+%F %T') === rom/ changed → reconcile + deploy ===" >> "$LOG"
-./sync-library.sh >> "$LOG" 2>&1
+./scripts/sync-library.sh >> "$LOG" 2>&1
 status=$?
 echo "$(date '+%F %T') === finished (exit $status) ===" >> "$LOG"
 exit $status

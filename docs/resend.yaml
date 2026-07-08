@@ -65,8 +65,8 @@ apply_on_host:
     where: Google Secret Manager + deploy-backend.sh (already wired)
     commands:
       - printf %s 're_xxxxxxxx' | gcloud secrets create resend-api-key --data-file=- --project resource-arjusingh
-      - export RAZORPAY_KEY_ID=rzp_live_...; export ADMIN_PASSWORD=...; ./deploy-backend.sh
-    note: deploy-backend.sh auto-detects the resend-api-key secret and turns email ON.
+      - export RAZORPAY_KEY_ID=rzp_live_...; export ADMIN_PASSWORD=...; ./scripts/deploy-backend.sh
+    note: scripts/deploy-backend.sh auto-detects the resend-api-key secret and turns email ON.
 
 # 5) VERIFY IT WORKS
 test:

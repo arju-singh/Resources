@@ -1,23 +1,9 @@
 {
   "hosting": {
-    "public": ".",
+    "public": "public",
     "ignore": [
-      "firebase.json",
-      "firebase.backend.json",
       "**/.*",
-      "**/node_modules/**",
-      "server.py",
-      "Dockerfile",
-      "deploy-backend.sh",
-      "sync-library.sh",
-      "DEPLOY.md",
-      "*.db",
-      "users.db",
-      "rom/**",
-      "library/**",
-      "*.log",
-      "package*.json",
-      "README.md"
+      "**/node_modules/**"
     ],
     "cleanUrls": false,
     "trailingSlash": false,

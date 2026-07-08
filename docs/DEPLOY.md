@@ -45,7 +45,7 @@ printf %s 'PASTE_YOUR_ROTATED_SECRET' | \
 
 ```bash
 export RAZORPAY_KEY_ID=rzp_live_xxxxxxxxxxxx   # your PUBLIC key id
-./deploy-backend.sh
+./scripts/deploy-backend.sh
 ```
 
 The script: checks billing → enables APIs → creates the DB bucket → grants the

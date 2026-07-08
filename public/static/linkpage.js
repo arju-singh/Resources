@@ -53,6 +53,25 @@ function attachTilt(el){
   el.addEventListener('pointerleave', () => tilt.style.transform = '');
 }
 
+// Merge admin-added content for this page as NATIVE link cards (same design).
+// Free "link" items → clickable cards; paid "file" items → open the buy modal.
+const pageSlug = (location.pathname.replace(/^\//, '').replace(/\.html$/, '') || 'index');
+try {
+  const resp = await fetch('/api/resources?page=' + encodeURIComponent(pageSlug));
+  const adminItems = resp.ok ? ((await resp.json()).resources || []) : [];
+  if (adminItems.length && window.EYN && EYN.loadConfig) { try { await EYN.loadConfig(); } catch (e) {} }
+  adminItems.forEach(r => {
+    if (r.kind === 'link') {
+      cards.push({ name: r.title, url: r.url || '#', desc: r.desc || '', icon: r.icon || '🔗',
+        kind: r.cat || 'Link', domain: 'Added', c1: '#a855f7', c2: '#ec4899' });
+    } else {
+      const price = (window.EYN && EYN.priceFor) ? EYN.priceFor(r).label : ('₹' + (r.price_inr != null ? r.price_inr : 99));
+      cards.push({ name: r.title, url: '#', desc: r.desc || '', icon: '⭐',
+        kind: r.cat || 'Download', domain: price + ' · buy', c1: '#a855f7', c2: '#ec4899', _res: r });
+    }
+  });
+} catch (e) { /* backend unreachable — native links still render */ }
+
 if (!cards.length) {
   grid.outerHTML = `<div class="lp-empty">Nothing here yet — links will appear once added.</div>`;
 } else {
@@ -67,6 +86,10 @@ if (!cards.length) {
     : null;
   [...grid.children].forEach((el, idx) => {
     attachTilt(el);
+    // Paid admin cards open the buy modal instead of navigating.
+    if (cards[idx] && cards[idx]._res && window.EYNRes) {
+      el.addEventListener('click', (e) => { e.preventDefault(); EYNRes.openBuy(cards[idx]._res); });
+    }
     if (REDUCE || !io) { el.classList.add('in'); return; }
     el.style.transitionDelay = ((idx % 4) * 60) + 'ms';
     io.observe(el);

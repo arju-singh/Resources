@@ -689,15 +689,44 @@ class Handler(BaseHTTPRequestHandler):
 
     def admin_upload(self, data):
         title = (data.get("title") or "").strip()
-        orig = (data.get("filename") or "").strip()
-        b64 = data.get("data")
         page = (data.get("page") or "library").strip().lower()
         cat = (data.get("cat") or "Other").strip()[:60] or "Other"
         desc = (data.get("desc") or "").strip()[:600]
-        if not title or not orig or not isinstance(b64, str):
-            return self.send_json({"error": "Title, file name and file are required."}, 400)
+        kind = (data.get("kind") or "file").strip().lower()
+        if not title:
+            return self.send_json({"error": "A title is required."}, 400)
         if page not in PAGE_PRICES:
             return self.send_json({"error": "Invalid target page."}, 400)
+
+        # --- Free native "link" card: metadata only, no file, never purchasable ---
+        if kind == "link":
+            url = (data.get("url") or "").strip()
+            icon = (data.get("icon") or "").strip()[:8] or "🔗"
+            if len(url) > 500 or not (url.startswith("http://") or url.startswith("https://") or url.startswith("/")):
+                return self.send_json({"error": "Enter a valid link (https://… or /path)."}, 400)
+            with _res_lock:
+                items = load_resources()
+                taken = {r.get("slug") for r in items}
+                base = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")[:60] or "link"
+                slug, n = base, 1
+                while slug in taken:
+                    n += 1
+                    slug = f"{base}-{n}"
+                res = {
+                    "slug": slug, "kind": "link", "title": title[:200], "desc": desc,
+                    "cat": cat, "page": page, "url": url[:500], "icon": icon,
+                    "fmt": "LINK", "price_inr": 0, "price_usd": 0, "dl": 0,
+                    "created_at": int(time.time()),
+                }
+                items.append(res)
+                save_resources(items)
+            return self.send_json({"ok": True, "resource": res})
+
+        # --- Paid downloadable file (upload flow) ---
+        orig = (data.get("filename") or "").strip()
+        b64 = data.get("data")
+        if not orig or not isinstance(b64, str):
+            return self.send_json({"error": "A file is required for a paid download."}, 400)
         if is_sensitive_filename(orig):
             return self.send_json({"error": "That file type isn’t allowed for security reasons."}, 400)
         if "," in b64[:64] and b64.lstrip().startswith("data:"):
@@ -730,7 +759,7 @@ class Handler(BaseHTTPRequestHandler):
             with open(os.path.join(UPLOAD_DIR, slug), "wb") as f:
                 f.write(blob)
             res = {
-                "slug": slug, "title": title[:200], "desc": desc, "cat": cat, "page": page,
+                "slug": slug, "kind": "file", "title": title[:200], "desc": desc, "cat": cat, "page": page,
                 "fmt": (os.path.splitext(orig)[1].lstrip(".").upper() or "FILE")[:8],
                 "size": len(blob),
                 "price_inr": as_price(data.get("price_inr"), page_price(page, "INR")),

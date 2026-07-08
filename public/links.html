@@ -30,16 +30,14 @@
 
   <main class="lp-grid" id="grid"></main>
 
-  <section id="page-resources" style="max-width:1100px;margin:44px auto 0;padding:0 24px"></section>
   <div id="page-admin-add" style="max-width:1100px;margin:22px auto 0;padding:0 24px"></div>
 
   <script src="/static/buy.js?v=20260707"></script>
-  <script src="/static/eyn-resources.js?v=20260709"></script>
+  <script src="/static/eyn-resources.js?v=20260710"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       if (!window.EYNRes) return;
       var PAGE = 'links';
-      EYNRes.mountShop(document.getElementById('page-resources'), { page: PAGE });
       EYNRes.mountAdmin(document.getElementById('page-admin-add'), { page: PAGE, onAdded: function () { location.reload(); } });
     });
   </script>
@@ -60,6 +58,6 @@
   <script src="/static/app.js?v=20260707"></script>
   <script src="/static/links-data.js?v=20260707"></script>
   <script>window.PAGE = {"hub": true};</script>
-  <script type="module" src="/static/linkpage.js"></script>
+  <script type="module" src="/static/linkpage.js?v=20260710"></script>
 </body>
 </html>

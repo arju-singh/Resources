@@ -1034,7 +1034,7 @@
   </div>
 
   <script src="/static/buy.js?v=20260707"></script>
-  <script src="/static/eyn-resources.js?v=20260709"></script>
+  <script src="/static/eyn-resources.js?v=20260710"></script>
   <script>
   (async function () {
     var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]); }); };
@@ -1049,6 +1049,15 @@
     if (!items.length) return;               // nothing published for this page yet
     wrap.style.display = '';
     grid.innerHTML = items.map(function (r, i) {
+      if (r.kind === 'link') {
+        var internal = (r.url || '').charAt(0) === '/';
+        return '<a class="cl-rcard" href="' + esc(r.url || '#') + '"' + (internal ? '' : ' target="_blank" rel="noopener"') + ' style="text-decoration:none">' +
+          '<div class="cl-rfmt">' + esc(r.icon || '🔗') + ' ' + esc(r.cat || 'Link') + '</div>' +
+          '<div class="cl-rtitle">' + esc(r.title) + '</div>' +
+          '<div class="cl-rdesc">' + esc(r.desc || '') + '</div>' +
+          '<div class="cl-rfoot"><span class="cl-rprice" style="font-size:15px;color:#c084fc">Free</span><span class="cl-rbuy">Open ' + (internal ? '→' : '↗') + '</span></div>' +
+          '</a>';
+      }
       var p = EYN.priceFor(r);
       return '<button class="cl-rcard" data-i="' + i + '" type="button">' +
         '<div class="cl-rfmt">' + esc(r.fmt) + '</div>' +
@@ -1059,7 +1068,7 @@
     }).join('');
     var modal = document.getElementById('cl-modal');
     var body = document.getElementById('cl-modal-body');
-    grid.querySelectorAll('.cl-rcard').forEach(function (card) {
+    grid.querySelectorAll('.cl-rcard[data-i]').forEach(function (card) {
       card.addEventListener('click', function () {
         var r = items[+card.dataset.i];
         body.innerHTML = '<h3 class="cl-modal-title">' + esc(r.title) + '</h3>' +

@@ -227,7 +227,7 @@
   </footer>
 
   <script src="/static/app.js?v=20260707"></script>
-  <script src="/static/eyn-resources.js?v=20260709"></script>
+  <script src="/static/eyn-resources.js?v=20260710"></script>
   <script>
     // Admin-only: publish a file straight to the Library page (any file type).
     document.addEventListener('DOMContentLoaded', function () {
@@ -360,7 +360,7 @@
       const k = cur === 'INR' ? 'price_inr' : 'price_usd';
       return (d && d[k] != null) ? d[k] : PAY.prices[cur];
     };
-    const priceLabel = (d) => money(CUR, resPrice(d, CUR));
+    const priceLabel = (d) => d.link_url ? 'Free' : money(CUR, resPrice(d, CUR));
     const priceMain  = (d) => priceLabel(d);
     const priceAlt   = (d) => CUR === 'INR' ? `or ${money('USD', resPrice(d, 'USD'))} international`
                                             : `or ${money('INR', resPrice(d, 'INR'))} in India`;
@@ -465,6 +465,15 @@
     // Everything is free — direct download of the static file. `download` sets the
     // saved filename to the original nice name (the URL uses a safe slug).
     function modalActions(d){
+      if (d.link_url) {
+        const internal = d.link_url.charAt(0) === '/';
+        return `
+        <div class="rbuy" id="rbuy">
+          <a class="rdl" href="${esc(d.link_url)}"${internal ? '' : ' target="_blank" rel="noopener"'}
+             style="text-decoration:none;text-align:center;display:block">🔗 Open link ${internal ? '→' : '↗'}</a>
+          <div class="rbuy-note">Free resource — opens the linked page.</div>
+        </div>`;
+      }
       return `
         <div class="rbuy" id="rbuy">
           <div class="rprice">
@@ -609,8 +618,10 @@
             i: 900000 + idx, title: x.title, slug: x.slug, file: x.slug,
             cat: x.cat || 'Other', desc: x.desc || '', fmt: x.fmt || 'FILE',
             size: x.size || 0, dl: x.dl || 0, tags: x.fmt ? [x.fmt] : [],
-            grad: 'linear-gradient(135deg,#7c3aed,#db2777)', icon: '✨', feat: 0,
-            price_inr: x.price_inr, price_usd: x.price_usd
+            grad: 'linear-gradient(135deg,#7c3aed,#db2777)',
+            icon: x.kind === 'link' ? (x.icon || '🔗') : '✨', feat: 0,
+            price_inr: x.price_inr, price_usd: x.price_usd,
+            link_url: x.kind === 'link' ? (x.url || '') : ''   // free clickable link item
           });
           const c = x.cat || 'Other';
           if (c && !CATS.includes(c)) CATS.push(c);

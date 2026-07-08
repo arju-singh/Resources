@@ -36,6 +36,10 @@
   .hide { display: none !important; }
   .pill { display:inline-block; font-size:11px; font-weight:800; letter-spacing:.5px; text-transform:uppercase;
     background:rgba(192,132,252,.14); color:#d6bcff; border:1px solid rgba(192,132,252,.3); padding:3px 9px; border-radius:7px; }
+  .seg { display:flex; gap:10px; }
+  .segbtn { flex:1; cursor:pointer; font-family:inherit; font-weight:800; font-size:14px; color:var(--muted);
+    background:var(--panel2,#17171c); border:1px solid var(--border); border-radius:11px; padding:13px 12px; }
+  .segbtn.on { color:#fff; border-color:#a855f7; background:rgba(168,85,247,.16); }
 </style>
 </head>
 <body>
@@ -73,10 +77,23 @@
           <b style="font-size:18px">Upload a file</b>
           <button class="btn ghost" id="logout-btn" style="margin:0;padding:9px 16px;font-size:13px">Log out</button>
         </div>
-        <label for="file">File (PDF, DOCX, Pages, XLSX, Notion export, image… any type · 40 MB max)</label>
-        <input type="file" id="file">
+        <label>Type</label>
+        <div class="seg" id="type-seg">
+          <button type="button" class="segbtn on" data-type="link">🔗 Free link / card</button>
+          <button type="button" class="segbtn" data-type="file">🔒 Paid download</button>
+        </div>
         <label for="title">Title</label>
         <input type="text" id="title" placeholder="e.g. Ultimate Launch Checklist">
+        <div id="link-wrap">
+          <div class="row">
+            <div style="flex:0 0 110px;min-width:110px"><label for="icon">Icon</label><input type="text" id="icon" maxlength="4" placeholder="🔗"></div>
+            <div style="flex:3"><label for="url">Link URL</label><input type="text" id="url" placeholder="https://… or /path"></div>
+          </div>
+        </div>
+        <div id="file-wrap" style="display:none">
+          <label for="file">File (any type · 40 MB max)</label>
+          <input type="file" id="file">
+        </div>
         <div class="row">
           <div>
             <label for="page">Show on page</label>
@@ -98,7 +115,7 @@
             <input type="text" id="cat" placeholder="e.g. Guides">
           </div>
         </div>
-        <div class="row">
+        <div class="row" id="price-wrap" style="display:none">
           <div>
             <label for="price_inr">Price — pick one</label>
             <select id="price_inr">
@@ -118,7 +135,7 @@
         </div>
         <label for="desc">Short description</label>
         <textarea id="desc" placeholder="One or two lines about this resource."></textarea>
-        <button class="btn" id="upload-btn">⬆ Upload &amp; publish</button>
+        <button class="btn" id="upload-btn">＋ Publish link</button>
         <div class="msg" id="up-msg"></div>
       </div>
 
@@ -190,31 +207,48 @@
       });
     }
 
+    // --- Type toggle (free link vs paid download) ---
+    let ADMIN_TYPE = 'link';
+    function setType(t){
+      ADMIN_TYPE = t;
+      document.querySelectorAll('#type-seg .segbtn').forEach(b => b.classList.toggle('on', b.dataset.type === t));
+      $('link-wrap').style.display = t === 'link' ? '' : 'none';
+      $('file-wrap').style.display = t === 'file' ? '' : 'none';
+      $('price-wrap').style.display = t === 'file' ? '' : 'none';
+      $('upload-btn').innerHTML = t === 'file' ? '⬆ Upload &amp; publish' : '＋ Publish link';
+    }
+    document.querySelectorAll('#type-seg .segbtn').forEach(b => b.addEventListener('click', () => setType(b.dataset.type)));
+    setType('link');
+
     $('upload-btn').addEventListener('click', upload);
     async function upload(){
       const msg = $('up-msg'); const btn = $('upload-btn');
-      const file = $('file').files[0];
       const title = $('title').value.trim();
-      if (!file) { msg.textContent = 'Choose a file first.'; msg.className='msg err'; return; }
+      const page = $('page').value, cat = $('cat').value.trim(), desc = $('desc').value.trim();
       if (!title) { msg.textContent = 'Give it a title.'; msg.className='msg err'; return; }
-      if (file.size > 40*1024*1024) { msg.textContent = 'File is over 40 MB.'; msg.className='msg err'; return; }
-      btn.disabled = true; msg.textContent = 'Uploading…'; msg.className = 'msg';
+      let payload;
+      if (ADMIN_TYPE === 'link') {
+        const url = $('url').value.trim();
+        if (!/^(https?:\/\/|\/)/.test(url)) { msg.textContent = 'Enter a valid link (https://… or /path).'; msg.className='msg err'; return; }
+        payload = { kind:'link', title, page, cat, desc, url, icon: $('icon').value.trim() };
+      } else {
+        const file = $('file').files[0];
+        if (!file) { msg.textContent = 'Choose a file first.'; msg.className='msg err'; return; }
+        if (file.size > 40*1024*1024) { msg.textContent = 'File is over 40 MB.'; msg.className='msg err'; return; }
+        msg.textContent = 'Uploading…'; msg.className = 'msg';
+        const inr = parseInt($('price_inr').value, 10);
+        payload = { kind:'file', title, filename: file.name, page, cat, desc, price_inr: inr, price_usd: usdForInr(inr), data: await readAsBase64(file) };
+      }
+      btn.disabled = true; if (ADMIN_TYPE === 'link') { msg.textContent = 'Publishing…'; msg.className = 'msg'; }
       try {
-        const data = await readAsBase64(file);
-        const r = await fetch('/api/admin/upload', { method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({
-            title, filename: file.name, page: $('page').value, cat: $('cat').value.trim(),
-            desc: $('desc').value.trim(),
-            price_inr: parseInt($('price_inr').value, 10),
-            price_usd: usdForInr(parseInt($('price_inr').value, 10)), data
-          }) });
+        const r = await fetch('/api/admin/upload', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
         const d = await r.json();
         if (r.ok) {
           msg.textContent = '✓ Published “' + d.resource.title + '”.'; msg.className = 'msg ok';
-          $('file').value=''; $('title').value=''; $('cat').value=''; $('desc').value='';
+          ['file','title','cat','desc','url','icon'].forEach(id => { if ($(id)) $(id).value=''; });
           loadResources();
-        } else { msg.textContent = d.error || 'Upload failed.'; msg.className = 'msg err'; }
-      } catch(e){ msg.textContent = 'Upload error: ' + e.message; msg.className = 'msg err'; }
+        } else { msg.textContent = d.error || 'Publish failed.'; msg.className = 'msg err'; }
+      } catch(e){ msg.textContent = 'Error: ' + e.message; msg.className = 'msg err'; }
       btn.disabled = false;
     }
 
@@ -224,15 +258,21 @@
         const d = await (await fetch('/api/admin/resources')).json();
         const items = d.resources || [];
         if (!items.length) { box.innerHTML = '<div class="sub">No uploads yet.</div>'; return; }
-        box.innerHTML = items.slice().reverse().map(r => `
+        box.innerHTML = items.slice().reverse().map(r => {
+          const isLink = r.kind === 'link';
+          const meta = isLink
+            ? `🔗 Link · ${esc(r.cat||'')}`
+            : `${esc(r.fmt)} · ${(r.size/1024).toFixed(0)} KB · ${esc(r.cat||'')}`;
+          const price = isLink ? 'Free' : `₹${r.price_inr} · $${r.price_usd}`;
+          return `
           <div class="res">
             <div class="meta">
               <div class="t">${esc(r.title)} <span class="pill">${esc(r.page)}</span></div>
-              <div class="d">${esc(r.fmt)} · ${(r.size/1024).toFixed(0)} KB · ${esc(r.cat||'')}</div>
+              <div class="d">${meta}</div>
             </div>
-            <div class="price">₹${r.price_inr} · $${r.price_usd}</div>
+            <div class="price">${price}</div>
             <button class="del" data-slug="${esc(r.slug)}">Delete</button>
-          </div>`).join('');
+          </div>`; }).join('');
         box.querySelectorAll('.del').forEach(b => b.addEventListener('click', () => del(b.dataset.slug)));
       } catch(e){ box.innerHTML = '<div class="msg err">Couldn’t load list.</div>'; }
     }

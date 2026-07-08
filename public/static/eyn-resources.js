@@ -32,7 +32,7 @@ window.EYNRes = (function () {
       .eynres-sub{color:var(--muted,#9a9aa5);font-size:15px;margin:6px 0 2px}
       .eynres-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));margin-top:18px}
       .eynres-card{text-align:left;cursor:pointer;border:1px solid var(--border,#2a2a30);border-radius:16px;background:rgba(20,20,23,.72);
-        padding:20px;display:flex;flex-direction:column;gap:8px;color:var(--text,#f4f4f5);font-family:inherit;
+        padding:20px;display:flex;flex-direction:column;gap:8px;color:var(--text,#f4f4f5);font-family:inherit;text-decoration:none;
         transition:transform .18s,border-color .25s,box-shadow .25s}
       .eynres-card:hover{transform:translateY(-4px);border-color:#c084fc;box-shadow:0 22px 54px -26px rgba(192,132,252,.5)}
       .eynres-fmt{font-size:11px;font-weight:800;letter-spacing:1px;color:#c084fc}
@@ -70,7 +70,11 @@ window.EYNRes = (function () {
       .eynadm-btn:disabled{opacity:.55;cursor:default}
       .eynadm-msg{font-size:13px;font-weight:600;min-height:1em;margin-top:10px;color:var(--muted,#9a9aa5)}
       .eynadm-msg.err{color:#fca5a5}.eynadm-msg.ok{color:#4ade80}
-      .eynadm-hint{color:var(--muted,#9a9aa5);font-size:12px;margin-top:4px}`;
+      .eynadm-hint{color:var(--muted,#9a9aa5);font-size:12px;margin-top:4px}
+      .eynadm-seg{display:flex;gap:8px;margin-top:2px}
+      .eynadm-type{flex:1;cursor:pointer;font-family:inherit;font-weight:800;font-size:13px;color:var(--muted,#9a9aa5);
+        background:#17171c;border:1px solid var(--border,#2a2a30);border-radius:10px;padding:11px 10px}
+      .eynadm-type.on{color:#fff;border-color:#a855f7;background:rgba(168,85,247,.16)}`;
     document.head.appendChild(s);
   }
 
@@ -80,6 +84,25 @@ window.EYNRes = (function () {
     return `<label>Price (pick one)</label>
       <select class="eynadm-price">${opts}</select>
       <div class="eynadm-hint">Buyers in India pay the ₹ amount; everyone else pays the matching $.</div>`;
+  }
+
+  // Shared buy modal — usable from mountShop or from a page's native cards.
+  function openBuyModal(r) {
+    injectCss();
+    let modal = document.getElementById('eynres-modal');
+    if (!modal) {
+      modal = el('<div class="eynres-modal" id="eynres-modal"><div class="eynres-mcard">' +
+        '<button class="eynres-x" aria-label="Close">✕</button><div class="eynres-mbody"></div></div></div>');
+      document.body.appendChild(modal);
+      modal.querySelector('.eynres-x').addEventListener('click', () => modal.classList.remove('open'));
+      modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+    }
+    const body = modal.querySelector('.eynres-mbody');
+    body.innerHTML = '<h3 class="eynres-mtitle">' + esc(r.title) + '</h3>' +
+      '<p class="eynres-mdesc">' + esc(r.desc || '') + '</p><div class="eynres-buybox"></div>';
+    if (window.EYN && EYN.mountBuyBox) EYN.mountBuyBox(body.querySelector('.eynres-buybox'), r);
+    else body.querySelector('.eynres-buybox').textContent = 'Checkout unavailable — payments not loaded.';
+    modal.classList.add('open');
   }
 
   // ---- Public shop: render this page's paid resources with a buy modal ----
@@ -100,42 +123,39 @@ window.EYNRes = (function () {
       const sub = opts.subtitle || 'Paid, downloadable resources — pay once, we email your download link.';
       const head = el('<div class="eynres-head"></div>');
       head.innerHTML = '<h2 class="eynres-h2">' + esc(title) +
-        ' <span class="eynres-count">' + items.length + ' file' + (items.length > 1 ? 's' : '') + '</span></h2>' +
+        ' <span class="eynres-count">' + items.length + ' item' + (items.length > 1 ? 's' : '') + '</span></h2>' +
         '<p class="eynres-sub">' + esc(sub) + '</p>';
       container.appendChild(head);
       const grid = el('<div class="eynres-grid"></div>');
-      items.forEach((r, i) => {
-        const price = (window.EYN && EYN.priceFor) ? EYN.priceFor(r).label
-          : ('₹' + (r.price_inr != null ? r.price_inr : 99));
-        const card = el(
-          '<button class="eynres-card" type="button">' +
-            '<div class="eynres-fmt">' + esc(r.fmt || 'FILE') + '</div>' +
-            '<div class="eynres-title">' + esc(r.title) + '</div>' +
-            '<div class="eynres-desc">' + esc(r.desc || '') + '</div>' +
-            '<div class="eynres-foot"><span class="eynres-price">' + price + '</span>' +
-            '<span class="eynres-buy">Buy &amp; download →</span></div>' +
-          '</button>');
-        card.addEventListener('click', () => openModal(r));
-        grid.appendChild(card);
+      items.forEach((r) => {
+        if (r.kind === 'link') {
+          // Free clickable card
+          const internal = (r.url || '').charAt(0) === '/';
+          const card = el(
+            '<a class="eynres-card" href="' + esc(r.url || '#') + '"' + (internal ? '' : ' target="_blank" rel="noopener"') + '>' +
+              '<div class="eynres-fmt">' + esc(r.icon || '🔗') + ' ' + esc(r.cat || 'Link') + '</div>' +
+              '<div class="eynres-title">' + esc(r.title) + '</div>' +
+              '<div class="eynres-desc">' + esc(r.desc || '') + '</div>' +
+              '<div class="eynres-foot"><span class="eynres-price" style="font-size:14px;color:#c084fc">Free</span>' +
+              '<span class="eynres-buy">Open ' + (internal ? '→' : '↗') + '</span></div>' +
+            '</a>');
+          grid.appendChild(card);
+        } else {
+          const price = (window.EYN && EYN.priceFor) ? EYN.priceFor(r).label
+            : ('₹' + (r.price_inr != null ? r.price_inr : 99));
+          const card = el(
+            '<button class="eynres-card" type="button">' +
+              '<div class="eynres-fmt">' + esc(r.fmt || 'FILE') + '</div>' +
+              '<div class="eynres-title">' + esc(r.title) + '</div>' +
+              '<div class="eynres-desc">' + esc(r.desc || '') + '</div>' +
+              '<div class="eynres-foot"><span class="eynres-price">' + price + '</span>' +
+              '<span class="eynres-buy">Buy &amp; download →</span></div>' +
+            '</button>');
+          card.addEventListener('click', () => openBuyModal(r));
+          grid.appendChild(card);
+        }
       });
       container.appendChild(grid);
-    }
-
-    function openModal(r) {
-      let modal = document.getElementById('eynres-modal');
-      if (!modal) {
-        modal = el('<div class="eynres-modal" id="eynres-modal"><div class="eynres-mcard">' +
-          '<button class="eynres-x" aria-label="Close">✕</button><div class="eynres-mbody"></div></div></div>');
-        document.body.appendChild(modal);
-        modal.querySelector('.eynres-x').addEventListener('click', () => modal.classList.remove('open'));
-        modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
-      }
-      const body = modal.querySelector('.eynres-mbody');
-      body.innerHTML = '<h3 class="eynres-mtitle">' + esc(r.title) + '</h3>' +
-        '<p class="eynres-mdesc">' + esc(r.desc || '') + '</p><div class="eynres-buybox"></div>';
-      if (window.EYN && EYN.mountBuyBox) EYN.mountBuyBox(body.querySelector('.eynres-buybox'), r);
-      else body.querySelector('.eynres-buybox').textContent = 'Checkout unavailable — payments not loaded.';
-      modal.classList.add('open');
     }
 
     return { reload: async () => { try { items = ((await (await fetch('/api/resources?page=' + encodeURIComponent(page))).json()).resources) || []; } catch (e) {} render(); } };
@@ -189,48 +209,77 @@ window.EYNRes = (function () {
       const defInr = (window.EYN && EYN.PAY && EYN.PAY.page_prices && EYN.PAY.page_prices[page] && EYN.PAY.page_prices[page].INR) || 99;
       const startInr = PRESETS_INR.indexOf(defInr) >= 0 ? defInr : 99;
       const body = shell(
-        '<label>File (any type · 40 MB max)</label>' +
-        '<input type="file" class="eynadm-file">' +
+        '<label>Type</label>' +
+        '<div class="eynadm-seg">' +
+          '<button type="button" class="eynadm-type on" data-type="link">🔗 Free link / card</button>' +
+          '<button type="button" class="eynadm-type" data-type="file">🔒 Paid download</button>' +
+        '</div>' +
         '<label>Title</label>' +
         '<input type="text" class="eynadm-title" placeholder="e.g. Ultimate Launch Checklist">' +
+        // link-only fields
+        '<div class="eynadm-linkonly">' +
+          '<div class="eynadm-row">' +
+            '<div style="flex:0 0 90px;min-width:90px"><label>Icon</label><input type="text" class="eynadm-icon" maxlength="4" placeholder="🔗"></div>' +
+            '<div style="flex:3"><label>Link URL</label><input type="text" class="eynadm-url" placeholder="https://… or /path"></div>' +
+          '</div>' +
+        '</div>' +
+        // file-only fields
+        '<div class="eynadm-fileonly" style="display:none">' +
+          '<label>File (any type · 40 MB max)</label>' +
+          '<input type="file" class="eynadm-file">' +
+        '</div>' +
         '<div class="eynadm-row">' +
           '<div><label>Category / tag</label><input type="text" class="eynadm-cat" placeholder="e.g. Guides"></div>' +
-          '<div>' + priceControl(startInr) + '</div>' +
+          '<div class="eynadm-priceonly" style="display:none">' + priceControl(startInr) + '</div>' +
         '</div>' +
         '<label>Short description</label>' +
         '<textarea class="eynadm-desc" placeholder="One or two lines about this resource."></textarea>' +
-        '<button class="eynadm-btn eynadm-up">⬆ Upload &amp; publish</button>' +
+        '<button class="eynadm-btn eynadm-up">＋ Publish</button>' +
         '<button class="eynadm-btn ghost eynadm-out" style="margin-left:8px">Log out</button>' +
         '<div class="eynadm-msg"></div>');
       if (openNow) body.classList.add('open');
       const msg = body.querySelector('.eynadm-msg');
       const btn = body.querySelector('.eynadm-up');
+      let type = 'link';
+      const setType = (t) => {
+        type = t;
+        body.querySelectorAll('.eynadm-type').forEach(b => b.classList.toggle('on', b.dataset.type === t));
+        body.querySelector('.eynadm-linkonly').style.display = t === 'link' ? '' : 'none';
+        body.querySelector('.eynadm-fileonly').style.display = t === 'file' ? '' : 'none';
+        body.querySelector('.eynadm-priceonly').style.display = t === 'file' ? '' : 'none';
+        btn.textContent = t === 'file' ? '⬆ Upload & publish' : '＋ Publish link';
+      };
+      body.querySelectorAll('.eynadm-type').forEach(b => b.addEventListener('click', () => setType(b.dataset.type)));
+      setType('link');
       btn.addEventListener('click', async () => {
-        const file = body.querySelector('.eynadm-file').files[0];
         const title = body.querySelector('.eynadm-title').value.trim();
-        const inr = parseInt(body.querySelector('.eynadm-price').value, 10);
-        if (!file) { msg.textContent = 'Choose a file first.'; msg.className = 'eynadm-msg err'; return; }
+        const cat = body.querySelector('.eynadm-cat').value.trim();
+        const desc = body.querySelector('.eynadm-desc').value.trim();
         if (!title) { msg.textContent = 'Give it a title.'; msg.className = 'eynadm-msg err'; return; }
-        if (file.size > 40 * 1024 * 1024) { msg.textContent = 'File is over 40 MB.'; msg.className = 'eynadm-msg err'; return; }
-        btn.disabled = true; msg.textContent = 'Uploading…'; msg.className = 'eynadm-msg';
+        let payload;
+        if (type === 'link') {
+          const url = body.querySelector('.eynadm-url').value.trim();
+          if (!/^(https?:\/\/|\/)/.test(url)) { msg.textContent = 'Enter a valid link (https://… or /path).'; msg.className = 'eynadm-msg err'; return; }
+          payload = { kind: 'link', title, page, cat, desc, url, icon: body.querySelector('.eynadm-icon').value.trim() };
+        } else {
+          const file = body.querySelector('.eynadm-file').files[0];
+          const inr = parseInt(body.querySelector('.eynadm-price').value, 10);
+          if (!file) { msg.textContent = 'Choose a file first.'; msg.className = 'eynadm-msg err'; return; }
+          if (file.size > 40 * 1024 * 1024) { msg.textContent = 'File is over 40 MB.'; msg.className = 'eynadm-msg err'; return; }
+          msg.textContent = 'Uploading…'; msg.className = 'eynadm-msg';
+          payload = { kind: 'file', title, filename: file.name, page, cat, desc, price_inr: inr, price_usd: usdForInr(inr), data: await readB64(file) };
+        }
+        btn.disabled = true; if (type === 'link') { msg.textContent = 'Publishing…'; msg.className = 'eynadm-msg'; }
         try {
-          const data = await readB64(file);
-          const r = await fetch('/api/admin/upload', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              title, filename: file.name, page, cat: body.querySelector('.eynadm-cat').value.trim(),
-              desc: body.querySelector('.eynadm-desc').value.trim(),
-              price_inr: inr, price_usd: usdForInr(inr), data
-            })
-          });
+          const r = await fetch('/api/admin/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
           const d = await r.json();
           if (r.ok) {
             msg.textContent = '✓ Published “' + d.resource.title + '”.'; msg.className = 'eynadm-msg ok';
-            body.querySelector('.eynadm-file').value = ''; body.querySelector('.eynadm-title').value = '';
-            body.querySelector('.eynadm-cat').value = ''; body.querySelector('.eynadm-desc').value = '';
+            ['.eynadm-title', '.eynadm-cat', '.eynadm-desc', '.eynadm-url', '.eynadm-icon'].forEach(s => { const el = body.querySelector(s); if (el) el.value = ''; });
+            const f = body.querySelector('.eynadm-file'); if (f) f.value = '';
             onAdded(d.resource);
-          } else { msg.textContent = d.error || 'Upload failed.'; msg.className = 'eynadm-msg err'; }
-        } catch (e) { msg.textContent = 'Upload error: ' + e.message; msg.className = 'eynadm-msg err'; }
+          } else { msg.textContent = d.error || 'Publish failed.'; msg.className = 'eynadm-msg err'; }
+        } catch (e) { msg.textContent = 'Error: ' + e.message; msg.className = 'eynadm-msg err'; }
         btn.disabled = false;
       });
       body.querySelector('.eynadm-out').addEventListener('click', async () => {
@@ -240,5 +289,5 @@ window.EYNRes = (function () {
     }
   }
 
-  return { PRESETS_INR, INR_TO_USD, usdForInr, mountShop, mountAdmin };
+  return { PRESETS_INR, INR_TO_USD, usdForInr, mountShop, mountAdmin, openBuy: openBuyModal };
 })();

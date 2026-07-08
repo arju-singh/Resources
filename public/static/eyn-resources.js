@@ -26,6 +26,10 @@ window.EYNRes = (function () {
     const s = document.createElement('style');
     s.id = 'eynres-css';
     s.textContent = `
+      .eynres-head{margin-top:8px}
+      .eynres-h2{font-size:24px;font-weight:900;letter-spacing:-.5px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+      .eynres-count{font-size:13px;font-weight:800;color:#c084fc}
+      .eynres-sub{color:var(--muted,#9a9aa5);font-size:15px;margin:6px 0 2px}
       .eynres-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));margin-top:18px}
       .eynres-card{text-align:left;cursor:pointer;border:1px solid var(--border,#2a2a30);border-radius:16px;background:rgba(20,20,23,.72);
         padding:20px;display:flex;flex-direction:column;gap:8px;color:var(--text,#f4f4f5);font-family:inherit;
@@ -89,7 +93,16 @@ window.EYNRes = (function () {
     render();
 
     function render() {
+      container.innerHTML = '';
       if (!items.length) { container.innerHTML = opts.emptyHtml || ''; return; }
+      // Labeled section header so every page presents its downloads clearly.
+      const title = opts.title || 'Premium downloads';
+      const sub = opts.subtitle || 'Paid, downloadable resources — pay once, we email your download link.';
+      const head = el('<div class="eynres-head"></div>');
+      head.innerHTML = '<h2 class="eynres-h2">' + esc(title) +
+        ' <span class="eynres-count">' + items.length + ' file' + (items.length > 1 ? 's' : '') + '</span></h2>' +
+        '<p class="eynres-sub">' + esc(sub) + '</p>';
+      container.appendChild(head);
       const grid = el('<div class="eynres-grid"></div>');
       items.forEach((r, i) => {
         const price = (window.EYN && EYN.priceFor) ? EYN.priceFor(r).label
@@ -105,7 +118,6 @@ window.EYNRes = (function () {
         card.addEventListener('click', () => openModal(r));
         grid.appendChild(card);
       });
-      container.innerHTML = '';
       container.appendChild(grid);
     }
 

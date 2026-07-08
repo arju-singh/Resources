@@ -83,6 +83,14 @@
             <select id="page">
               <option value="library">Library</option>
               <option value="checklist">Checklist</option>
+              <option value="docs">Docs</option>
+              <option value="notion">Notion</option>
+              <option value="github">GitHub</option>
+              <option value="discord">Discord</option>
+              <option value="websites">Websites</option>
+              <option value="links">Links</option>
+              <option value="free-llm-apis">Free LLM APIs</option>
+              <option value="userpain">User Pain</option>
             </select>
           </div>
           <div>
@@ -92,12 +100,20 @@
         </div>
         <div class="row">
           <div>
-            <label for="price_inr">Price ₹ (INR)</label>
-            <input type="number" id="price_inr" min="0" step="1">
+            <label for="price_inr">Price — pick one</label>
+            <select id="price_inr">
+              <option value="69">₹69</option>
+              <option value="79">₹79</option>
+              <option value="89">₹89</option>
+              <option value="99">₹99</option>
+              <option value="199">₹199</option>
+              <option value="299">₹299</option>
+            </select>
           </div>
           <div>
-            <label for="price_usd">Price $ (USD)</label>
-            <input type="number" id="price_usd" min="0" step="1">
+            <label>International price ($)</label>
+            <input type="text" id="price_usd_view" readonly>
+            <div class="sub" style="font-size:12px;margin-top:5px">India pays the ₹ amount · everyone else pays the matching $ (set automatically).</div>
           </div>
         </div>
         <label for="desc">Short description</label>
@@ -117,6 +133,13 @@
   <script>
     const $ = id => document.getElementById(id);
     let PAGE_PRICES = { library: { INR: 99, USD: 4 }, checklist: { INR: 199, USD: 10 } };
+    // The ₹ amounts the admin may pick, and the $ each maps to (₹99→$4 / ₹199→$10
+    // match the live library/checklist prices; others scale in between).
+    const PRESETS_INR = [69, 79, 89, 99, 199, 299];
+    const INR_TO_USD = { 69: 3, 79: 4, 89: 4, 99: 4, 199: 10, 299: 15 };
+    const usdForInr = inr => INR_TO_USD[inr] != null ? INR_TO_USD[inr] : Math.max(1, Math.round(inr / 22));
+    function syncUsd(){ $('price_usd_view').value = '$' + usdForInr(parseInt($('price_inr').value, 10)); }
+    $('price_inr').addEventListener('change', syncUsd);
 
     function show(id){ ['disabled','login','panel'].forEach(x => $(x).classList.toggle('hide', x !== id)); }
 
@@ -134,7 +157,9 @@
 
     function applyPageDefault(){
       const p = PAGE_PRICES[$('page').value] || PAGE_PRICES.library;
-      $('price_inr').value = p.INR; $('price_usd').value = p.USD;
+      // Snap to the page's default ₹ if it's one of the presets, else ₹99.
+      $('price_inr').value = PRESETS_INR.indexOf(p.INR) >= 0 ? p.INR : 99;
+      syncUsd();
     }
     $('page').addEventListener('change', applyPageDefault);
 
@@ -179,7 +204,9 @@
         const r = await fetch('/api/admin/upload', { method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({
             title, filename: file.name, page: $('page').value, cat: $('cat').value.trim(),
-            desc: $('desc').value.trim(), price_inr: $('price_inr').value, price_usd: $('price_usd').value, data
+            desc: $('desc').value.trim(),
+            price_inr: parseInt($('price_inr').value, 10),
+            price_usd: usdForInr(parseInt($('price_inr').value, 10)), data
           }) });
         const d = await r.json();
         if (r.ok) {

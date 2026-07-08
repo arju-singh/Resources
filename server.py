@@ -82,6 +82,11 @@ PAGE_PRICES = {
     "checklist": {"INR": int(os.environ.get("CHECKLIST_PRICE_INR", 199)),
                   "USD": int(os.environ.get("CHECKLIST_PRICE_USD", 10))},
 }
+# Extra pages the admin may also publish paid files to. They inherit the global
+# default price; the admin picks a per-file price at upload time anyway.
+for _p in ("docs", "notion", "github", "discord", "websites", "links",
+           "free-llm-apis", "userpain"):
+    PAGE_PRICES.setdefault(_p, {"INR": DEFAULT_PRICES["INR"], "USD": DEFAULT_PRICES["USD"]})
 def page_price(page, currency):
     cur = currency if currency in DEFAULT_PRICES else "INR"
     return PAGE_PRICES.get(page, DEFAULT_PRICES)[cur]

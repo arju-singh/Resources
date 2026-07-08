@@ -30,6 +30,20 @@
 
   <main class="lp-grid" id="grid"></main>
 
+  <section id="page-resources" style="max-width:1100px;margin:44px auto 0;padding:0 24px"></section>
+  <div id="page-admin-add" style="max-width:1100px;margin:22px auto 0;padding:0 24px"></div>
+
+  <script src="/static/buy.js?v=20260707"></script>
+  <script src="/static/eyn-resources.js?v=20260708"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (!window.EYNRes) return;
+      var PAGE = 'websites';
+      EYNRes.mountShop(document.getElementById('page-resources'), { page: PAGE });
+      EYNRes.mountAdmin(document.getElementById('page-admin-add'), { page: PAGE, onAdded: function () { location.reload(); } });
+    });
+  </script>
+
   <footer class="site">
     <div class="inner">
       <div class="col">
@@ -40,7 +54,7 @@
       <div class="col"><h4>Links</h4><a href="/websites.html">Websites</a><a href="/github.html">GitHub</a><a href="/docs.html">Docs</a><a href="/notion.html">Notion</a><a href="/discord.html">Discord</a></div>
       <div class="col"><h4>Legal</h4><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/contact.html">Contact</a></div>
     </div>
-    <div class="bottom">© 2026 AI Tools. All rights reserved.</div>
+    <div class="bottom">© 2026 Everything You Need · Designed &amp; developed by <a href="https://arjusingh.com" target="_blank" rel="noopener" style="color:#c084fc;text-decoration:none">Arju Singh</a> · <a href="mailto:connect@arjusingh.com" style="color:#c084fc;text-decoration:none">connect@arjusingh.com</a></div>
   </footer>
 
   <script src="/static/app.js?v=20260707"></script>
